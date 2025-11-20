@@ -2,41 +2,34 @@
 In diesem Kapitel werden alle notwendigen Hintergrundinfos zum Verständnis der Arbeit gegeben.
 
 \section{Transformer}
-Die Architektur des Transformer Modells wurde erstmals 2017 von Vaswani \textcite{Vaswani2017} vorgestellt und stellt eine fundamentale Neuerung im Bereich der neuronalen Netze und natürlicher Sprachverarbeitung dar (NLP) dar. Die Transformer-Architektur verzichtet vollständig auf rekurrente oder konvolutionale Mechanismen und setzt stattdessen auf einen Selbstaufmerksamkeitmechanismus(Self Attention). Dadurch übertreffen Transformermodelle ältere Modelle wie rekurrente neuronale Netze (RNNs) und Convolutional Neural Networks )CNN) in vielen Anwendungsfällen wie Kontextverständniss, Parallelisierbarkeit und Skalierbarkeit. Darüber hinaus können Transformermodelle universell in verschiedenen Bereichen eingesetzt werden. Die Transformer Architektur bildet die Grundlage für nahezu alle aktuell großen Sprachmodelle wie z.B. BERT, GPT oder T5
+Die Transformer-Architektur wurde 2017 von Vaswani et al. vorgestellt und markiert einen wesentlichen Fortschritt in der Entwicklung neuronaler Netze sowie in der natürlichen Sprachverarbeitung. Ihr zentraler Innovationspunkt liegt im vollständigen Verzicht auf rekurrente und konvolutionale Mechanismen zugunsten eines Selbstaufmerksamkeitsverfahrens (Self-Attention). Dieser Ansatz ermöglicht es, Abhängigkeiten zwischen weit auseinanderliegenden Token effizient zu modellieren und gleichzeitig eine hohe Parallelisierbarkeit der Berechnungen zu gewährleisten. Dadurch übertreffen Transformer-Modelle klassische Ansätze wie rekurrente neuronale Netze (RNNs) oder Convolutional Neural Networks (CNNs) im Hinblick auf Kontextverständnis, Rechenparallelität und Skalierbarkeit. Zudem erweist sich die Architektur als vielseitig einsetzbar und bildet heute die Grundlage nahezu aller großen Sprachmodelle wie BERT, GPT oder T5.
 
-In der folgenden Abbildung ist der orignale Aufbau eines Transformermodells schematisch dargestellt
+Der ursprüngliche Transformer besteht aus einem Encoder- und einem Decoder-Stack. Der Encoder verarbeitet die Eingabesequenz und erzeugt kontextualisierte Repräsentationen, die anschließend im Decoder genutzt werden, um Ausgabesequenzen wie Übersetzungen oder Vorhersagen zu generieren. Diese klare funktionale Trennung hat zur Entwicklung spezialisierter Modellvarianten geführt. So kommen Encoder-only-Modelle (z. B. BERT) vor allem in Aufgaben der Sprachrepräsentation und Klassifikation zum Einsatz, während Decoder-only-Modelle (z. B. GPT) für autoregressive Textgenerierung optimiert sind. Encoder–Decoder-Modelle (z. B. T5) wiederum eignen sich besonders für Sequenz-zu-Sequenz-Aufgaben.
 
-\begin{figure}
-\centering
-\includegraphics[height=0.7\textheight]{Bilder/encoder_decoder_transformer.drawio.png}
-\caption{Decoder-Only Transformer in Anlehnung an  und }
-\label{fig:decoder}
-\end{figure}
-
-In der originalen, von Vaswani u.a. vorgestellte Transformer Architektur besteht aus Encoder- und Decoderschichten. Der Encoder ist verantwortlich für die Verarbeitung des Eingabetexts und erzeugt daraus eine Reihe kontextualisierter Repräsentationen, welche vom Decoder genutzt werden um Ausgaben, wie einen übersetzten oder vorhergesagten Text, zu generieren. 
-
-Encoder- und Decoderschichten können unabhängig voneinander für Modelle genutzt werden, so hat sich die ursprüngliche Architektur zu drei Architekturrichtungen weiterentwickelt. Encoder-Only (BERT), Decoder-Only(GPT-Modelle) und Encoder-Decoder (T5) eigenen sich für verschiedene Anwendungsgebiete.
-
-Jeder Encoder und Decoder besteht aus weiteren Schichten
-
-Ein zentraler Bestandteil der Transformerarchitektur ist der Selbstaufmerksamkeitsmechanismus (Self-Attention), welcher es ermöglicht kontextuelle Zusammenhänge zwischen den Tokens zu erkennen. Bei diesem werden allen Tokens in der Eingabesequenz Werte je nach relevanz für den Gesamtkontext zugewiesen, wodurch Zusammenhänge über große Distanzen nicht verloren gehen. Die parallele Verarbeitung steigert die Effizienz sowie Qualität der Ausgabe immens, da Tokens nicht sequientiell nacheinander abgearbeitet werden wie bei RNN oder LSTM Modellen.
+Ein zentrales Element der Architektur ist der Selbstaufmerksamkeitsmechanismus. Er ermöglicht es dem Modell, die Relevanz jedes Tokens im Kontext der gesamten Sequenz einzuschätzen und dadurch sowohl lokale als auch langreichweitige Abhängigkeiten präzise abzubilden. Da alle Tokens gleichzeitig verarbeitet werden, entfallen die sequentiellen Engpässe klassischer RNN- oder LSTM-Modelle. Dies führt nicht nur zu einer erheblichen Steigerung der Effizienz, sondern verbessert auch die Qualität der generierten Repräsentationen und Ausgaben.
 
 \begin{itemize}
-    \item Self-Attention-Schicht:  
-    \item Feed-Forward-Schicht
-    \item Residualverbindung und Normalisierung
+    \item Imput Embedding
+    \item Positional-Encoding
+    \item Self-Attention-Schicht: Berechnung der Beziehung aller Tokens in einer Sequenz
+    \item Feed-Forward-Schicht: Verarbeitung gewonnener Informationen
+    \item Residualverbindung und Normalisierung: Stabilisierung des Trainings und Verbesserung des Informationsflusses
     
 \end{itemize}
 
-1. Self-Attention-Schicht: Berechnung der Beziehung zwischen allen Positionen einer Sequenz
-2. Feed-Forward-Schicht: Vearbeitung gewonnener Information
-3. Residualverbindung und Normalisierung: Stabilisierung des Trainings und verbessern des Informationsflusses zwischen schichten. 
+Ein Transformer-Modell setzt sich im Wesentlichen aus vier Komponenten zusammen: dem Input Embedding, den Positional Encodings, dem Selbstaufmerksamkeitsmechanismus sowie einem Feed-Forward-Netzwerk. Im ersten Schritt wird die Eingabesequenz durch einen Tokenizer in Token zerlegt, die beispielsweise Wörter, Subwörter, Satzzeichen oder spezielle Steuersymbole repräsentieren können. Das anschließende Input Embedding überführt jedes dieser Token in einen Vektor fester Länge. Die Dimensionalität dieser Vektoren wird durch die Modellgröße vorgegeben und bildet die Grundlage für alle weiteren Berechnungen im Netzwerk.
 
+Da ein Transformer keine inhärente Information über die Reihenfolge der Token besitzt, werden Positionsinformationen über sogenannte Positional Encodings ergänzt. Diese werden zu den Embeddings addiert und ermöglichen es dem Modell, sowohl absolute als auch relative Positionen innerhalb der Sequenz zu berücksichtigen. Die resultierende Sequenz aus Vektorrepräsentationen bildet den Eingang in die folgende Verarbeitungsschicht.
 
+Der Decoder – bzw. analog der Encoder – nutzt daraufhin den Selbstaufmerksamkeitsmechanismus, um die Beziehungen zwischen den Token innerhalb der Sequenz zu modellieren. In der Masked Multi-Head Attention, wie sie im Decoder eingesetzt wird, wird für jedes Token berechnet, welchen Einfluss die übrigen Token auf dessen Repräsentation haben. Die Berechnung erfolgt dabei parallel in mehreren „Attention-Heads“, die jeweils eigene Gewichtungsmatrizen verwenden. Dadurch kann das Modell verschiedene Arten von Abhängigkeiten gleichzeitig erfassen, etwa syntaktische Strukturen oder semantische Beziehungen.
+
+Im Anschluss an die Aufmerksamkeitsschicht werden die resultierenden Vektoren zu einer konsolidierten Repräsentation zusammengeführt und an ein positionseise arbeitendes Feed-Forward-Netzwerk übergeben. Dieses besteht typischerweise aus zwei linearen Transformationen und einer nichtlinearen Aktivierungsfunktion (z. B. ReLU oder GELU). Das Feed-Forward-Netzwerk erweitert die Modellkapazität erheblich, da es die Komplexität erhöht, mit der Muster aus den Daten gelernt werden können, und trägt maßgeblich zur Ausdrucksstärke der gesamten Architektur bei.
+
+Nachdem Alle schichten durchlaufen wurden, wird die Sequenz an ein finales neuronales netzt übergeben
+dieses berechnet die wahrscheinlichkeit für das nächste zu gernerieende Token
 
 Besonders GPT 
 Generative Pretrained Transformer
-Bild mit Aufbau vom Transformer Original und daran beschreiben wie aufgebaut ist 
 
 Vortraining und Finetuning
 
@@ -47,14 +40,14 @@ Darüber hinaus lassen sich Transformer auch für andere Zwecke einsetzten als z
 
 
 \section{Speech-to-Text}
-Speech-to-Text (STT), auch als Automatic Speech Recognition (ASR) bezeichnet, umfasst alle rechnergestützten Verfahren zur automatisierten Umwandlung gesprochener Sprache in schriftliche Form. Ziel dieser Systeme ist es, das akustische Sprachsignal zuverlässig zu erfassen, linguistisch zu interpretieren und in eine korrekte Textrepräsentation zu überführen (Juang & Rabiner, 2005). Moderne STT-Systeme kommen in zahlreichen Anwendungsbereichen zum Einsatz, etwa in Assistenzsystemen, Untertitelung, Barrierefreiheit, Dokumentationsprozessen oder der multimodalen Mensch-Maschine-Interaktion.
+Speech-to-Text (STT), auch als Automatic Speech Recognition (ASR) bezeichnet, umfasst alle rechnergestützten Verfahren zur automatisierten Umwandlung gesprochener Sprache in schriftliche Form. Ziel dieser Systeme ist es, das akustische Sprachsignal zuverlässig zu erfassen, linguistisch zu interpretieren und in eine korrekte Textrepräsentation zu überführen. Moderne STT-Systeme kommen in zahlreichen Anwendungsbereichen zum Einsatz, etwa in Assistenzsystemen, Untertitelung, Barrierefreiheit, Dokumentationsprozessen oder der multimodalen Mensch-Maschine-Interaktion.
 
 Die Entwicklung der Spracherkennung begann in den 1950er-Jahren mit regelbasierten Ansätzen zur Erkennung isolierter Wörter. Mit dem Aufkommen probabilistischer Verfahren – insbesondere Hidden Markov Models (HMM) – etablierte sich ab den 1970er-Jahren ein Standardansatz zur Modellierung zeitlicher Abhängigkeiten in Sprachsignalen (Rabiner, 1989). Ab etwa 2010 führte der Einsatz von Deep Learning und End-to-End-Modellen, insbesondere CTC-basierten und später Transformer-basierten Architekturen, zu erheblichen Leistungssteigerungen (Hinton et al., 2012; Graves et al., 2006). Seit der Veröffentlichung großer multilingualer Foundation-Modelle wie wav2vec 2.0 (Baevski et al., 2020) oder Whisper (Radford et al., 2022) dominieren zunehmend generalisierbare, robust trainierte Systeme das Feld.
 
 Moderne STT-Systeme basieren überwiegend auf Deep-Learning-Architekturen, die akustische Merkmalsrepräsentationen – meist in Form von Mel-Spektrogrammen – verarbeiten. Dabei lassen sich zwei grundlegende Schritte unterscheiden:
 
 \begin{itemize}
-    \item Das kontinuierliche Audiosignal wird segmentiert und in ein Log-Mel-Spektrogramm überführt, das die zeit-frequenzbasierte Struktur des Sprachsignals abbildet (Oppenheim & Schafer, 2010).
+    \item Das kontinuierliche Audiosignal wird segmentiert und in ein Log-Mel-Spektrogramm überführt, das die zeit-frequenzbasierte Struktur des Sprachsignals abbildet.
   
     \item Sequenzmodellierung und Dekodierung:Ein neuronales Modell erzeugt aus diesen Merkmalen eine Token-Sequenz, die anschließend zu Text zusammengesetzt wird. Moderne Modelle nutzen hierfür Transformer-Architekturen, da diese besonders gut mit langen Kontexten und sequentiellen Abhängigkeiten umgehen können (Vaswani et al., 2017).
 \end{itemize}
@@ -77,8 +70,11 @@ Im Rahmen des Masterprojekts (Verweis auf eigenen Projektrahmen) wurde Whisper �
 \begin{itemize}
     \item Vorbereitung und Normalisierung eines transkribierten Audio-Text-Korpus
     \item Umwandlung der Audiodaten in Whisper-kompatible Mel-Spektogramme
-    \
+    \item Training des Modells mit reduzierter Lernrate 
+    \item Evaluation auf Validierungsdaten und ggf. Anpassung der Hyperparameter
 \end{itemize}
+
+Faster-Whisper basiert architektonisch vollständig auf Whisper, verwendet jedoch eine optimierte Inferenz-Engine (z. B. CTranslate2), wodurch die Transkriptionsgeschwindigkeit erheblich erhöht wird, ohne Änderungen am zugrundeliegenden Modell vorzunehmen (Kreutzer et al., 2023).
 
 \section{Large-Language-Model}
 Large Language Models (LLMs) sind tiefenlernende neuronale Netze, die auf umfangreichen Sammlungen natürlicher Sprachdaten trainiert werden, um sowohl sprachliches Verständnis als auch generative Fähigkeiten zu entwickeln. Im Gegensatz zu älteren, stärker auf spezifische Aufgaben zugeschnittenen NLP-Modellen entstehen durch das Training auf breit gefächerten Textkorpora allgemeine, domänenübergreifende Sprachfertigkeiten. Daher werden moderne LLMs häufig als Foundation Models bezeichnet, da sie eine vielseitige Grundlage für eine Vielzahl nachgelagerter Anwendungen bieten (Zhao et al., 2023; Minaee et al., 2024).
