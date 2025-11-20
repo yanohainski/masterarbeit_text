@@ -1,0 +1,38 @@
+\chapter{Implementierung}
+\label{sec:implementierung}
+In diesem Kapitel wird die Umsetzung der geplanten Softwarearchitektur im Detail beschrieben. Der Fokus liegt dabei auf der Backend-Implementierung, während das Frontend nur oberflächlich betrachtet wird, dessen Hauptfunktion im Anzeigen und Bedienen der Applikation besteht. 
+
+Im folgenden wird zunächst die Gesamtarchitektur betrachtet, wobei Besonderheiten der Implementierung sowie die Nutzung von Django hervorgehoben werden. Anschließend wird die eigens entwickelte Django App \textit{Voice} vorgestellt, in der die Geschäftslogik implementiert ist. Zuletzt wird auf den Aufbau des eigentlichen LLM-Agenten eingegangen.
+
+\section{Proof on Concept}
+Zeigen des ersten Prototypen welcher Mit jupyter Notebook entstanden ist
+Probleme die sich ergeben haben (Threading) 
+
+\section{Backendstruktur}
+Ganz kurz beschreiben wie Struktur wie Notisent backend aufgebaut ist. Daran anschließend erklären wie eigenes Projekt eingebunden wird
+
+\section{Django voice-App}
+Verschiedene Apps, Django 
+DsPy 
+Webhooks 
+Code wie der Prompt eingebunden ist
+
+\section{Teams Bot}
+Attendee API 
+Wie funktioniert, wie wurde eingesetzt
+Vorherige Probleme mit erstellen von Teams Bot über MS Graph API und Azure erwähnen
+
+\section{Verarbeitung des Live-Transkripts}
+Prompt 
+
+\section{Frontend Application}
+Weniger Fokus drauf, nur anzeige von Zusammengefassten Texten, TBC 
+
+\section{Optimierung}
+Doppeloptimierung, Sprachmodell zum erkennen 
+Problem der Zugänglichkeit zu MS Team liveaudio
+Anpassen der Darstellung von 
+zero shot prompting 
+frew shot prompting 
+wie kann das ergebnis des assistenten optimiert werden
+evtl voranalyse? SpaCy

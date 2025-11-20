@@ -1,0 +1,6 @@
+\chapter{Ergebnisse}
+\section{Durchführung der Tests}
+Die Tests werden wie geplant im Frontend durchgeführt. Dafür werden die Prompts im Frontend Code als Konstante gespeichert um eine einfache Austauschbarkeit während der Entwicklung zu gewährleisten. Eine Übersicht über die 20 Prompts, welche für diese Tests verwendet werden ist in Tabelle \ref{tab:prompts} aufgelistet, wobei die Spalte \textit{E-Mail Id} angibt auf welche E-Mail in der Datenbank dieser Prompt verweist. Diese Prompts wurden wie in Kapitel \ref{sec:eval} beschrieben synthetisch erzeugt und anschließend manuell überprüft, ob dieser Prompt Sinn ergibt und auf eine Mail verweist, die diesen Inhalt auch enthält. Dabei stellt es zum Beispiel kein Problem dar, dass die Prompts mit den IDs 3 und 20 auf dieselbe Mail verweisen, da eine hier vorhandene Variation der Formulierung für diesen auf die Funktionalität des Agenten ausgelegten Test ausreichenden Mehrwert bieten. Für die Durchführung von einzelnen Testreihen wurde der Identifier \textit{test\_id} im Backend bzw. \textit{testId} im Frontend eingeführt mit dem die Prompts, E-Mails und Konversationen einer Testreihe gruppiert werden können.
+Die Tests werden dann wie folgt durchgeführt:
+
+\section{Analyse}

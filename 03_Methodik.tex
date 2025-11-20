@@ -1,0 +1,108 @@
+\chapter{Methodik}
+\section{Anforderungen an die Implementierung}
+-> Anforderungen von Notisent 
+-> Eigene Anforderungen
+-> Anforderungen aus der Industrie 
+Herausforderungen und mögliche Probleme 
+Vollständiges Interviewtranskript im Anhang 
+
+Die Anforderungen an die Implementierung ergeben sich aus den Zielen, die Notisent verfolgt, den anfangs definierten Forschungsfragen sowie einem Interview mit jemandem aus der Industrie der sich für das Projekt begeistern konnte. Da es sich bei dieser Arbeit um die Entwicklung eines Prototypen für Produkt handelt, welcher später von vielen Kund:innen genutzt wird, ist eine einfache Nutzung essentiell. Darüber hinaus muss die Implementierung skalierbar und erweiterbar sein. 
+
+Die Anforderungen sind umfangreicher als sie in dieser Arbeit komplett umgesetzt werden können, weshalb zwischen Muss- und Kann-Anforderungen unterschieden wird. 
+Muss Anforderungen sind Anforderungen für ein minimal viable Produkt und setzen sich wie folgt zusammen: 
+Muss Anforderungen:
+\begin{itemize}
+    \item Das System muss die gesprochenn Inhalte Transkribieren 
+    \item Das System muss in der Lage sein, die Transkription zu analysieren
+    \item Das System muss mit Microsoft Teams kompatibel sein
+    \item Das System muss in Echtzeit arbeiten
+    \item Das System muss das Gespräch sinnvoll und ohne Informationsverlust zusammenfassen
+    \item Das System muss die Informationen für alle Teilnehmer anzeigen.
+\end{itemize}
+Kann Anforderungen: 
+1. Sprechererkennung 
+2. Zugriff auf Datenbank für Kontext, mit Notisent Agent gemeinsam.
+3. Unterschiedliche Modi je nach Teilnehmer. Entwicklermodus für technischere Meetings oder Managermodus für weniger technische Inhalte
+4. 
+
+
+\section{Planung der Softwarearchitektur}
+Kurze Grafik, wie mit der Software interagiert wird. Ablaufdiagramm
+
+\subsection{Interaktion}
+Die Interaktion zwischen dem Anwender und des Meetingassistenten bildet die Schnittstelle zur Außenwelt und ist essentiell wichtig für die Benutzerfreundlichkeit des Gesamtsystems. Geplant ist die Entwicklung eines Teams Plugins, welches in der Lage ist die Informationen anzuzeigen. 
+Mithilfe der Attendee API (Referenz) ist das System in der Lage Audioinhalte aus einem Teams Meeting heraus zu streamen und zur weiteren verarbeitung an ein Backend zu streamen.
+größtes Problem bei der Recherche, war es zugriff auf MS Teams zu bekommen. Erstellen von Bots möglich, allerdings werden bestimmte zugriffe zurückgehalten. Z.b. Live Audio, daher gibt es nur nur eine zusammenfassung nachträglich von Teams.
+
+Attendee arbeitet mit Broswerautomatisierung, sodass das Meeting im browser geöffnet wird über die Teams browser variante und darüber dann daten abgegriffen.
+
+\subsection{Transkription}
+Die Transkription der Audioinhalte geschieht mit eines aus dem Masterprojekt bekannten Transkriptionservices welcher selbst mit einem Docker Container gehostet wird und auf Whisper basiert. 
+Als alternative kann auch ein Transcriptionservice der Attendee API verwendet werden. Diese ist in der Lage die Teams eigenen Closed Caption Transcription zu verwenden. 
+
+\subsection{Backendfunktionen}
+Backend handelt files, Umwandlung in richtigen Datentyp, und leitet die daten weiter an die richtige stelle. 
+Aufbau des Notisent Backends kurz erläutern, da in die Struktur eingebaut wird. 
+Beim Backend wird die vorhandene Backendstruktur von Nostisent genutzt und um eine eigene App erweitert. Das Backend von Notisent wurde mit Django gebaut.
+
+\subsection{Analyse des Transkripts}
+KI-Modelle auf Kisski Gehosted, wird über eine API zugegriffen. 
+Stellt verschiedene Modelle bereit. Prompts sollen 
+
+\subsection{Darstellung der Ergebnisse}
+Darstellung der ergebnisse vorherst sehr einfach halten. Soll allerdings später im Tool mit angezeigt werden. 
+Für diese Arbeit reicht eine einfache Web anwendung, welche 
+
+
+
+
+
+-Eigener Transcription Service mit Faster Whisper im Docker Container (Masterprojekt) 
+-> Attendee bietet auch eigene Transcription über closed caption an, testen ob diese Besser funktioniert als eigener Service. 
+-Notisent Django Backend zur Verarbeitung 
+-Attendee API um auf Teams Meeting zuzugreifen 
+
+Interaktion Nutzer <-> System
+
+KISSKI Hostet API auf dem LLMs laufen 
+
+\section{Implementierungsschritte}
+Wird vorgegangen um 
+
+Geplante schritte zur Umsetzung des Projekts
+Woraus setzt sich das Projekt zusammmen, Wie wird die Architektur aus kapitel davor umgesetzt. Auf was für bestehende teile wird zugegriffen? Masterprojekt sowie Notisent
+Proof of Concept bevor richtig bearbeitet werden soll, informationen daraus ziehen und für weiteres vorgehen 
+
+\section{Auswahl des LLM}
+Bei der Auswahl des LLMs 
+Vergleich verschiedener Modelle, vor und nachteile. Auswahl basierend auf papern und eigenen versuchen 
+Für das Projekt wird GPT-OSS verwendet, ist das von Notisent aktuell verwendete Modell für Ihre KI aufgaben. 
+Kurzbeschreibung was das kann und wie es in Benchmarks abschneidet. 
+Weitere Modelle erwähnen, 
+
+
+
+\section{Evaluatinskriterien und Testverfahren}
+
+Schwierigkeit das zu evaluieren, subjektiv wie etwas zusammengefasst wird. Nach bestehenen Metriken und benchmarks suchen und einfügen 
+
+Zur Bewertung der Live Zusammenfassung lassen sich verschiedene Metriken zu rate ziehen. Dazu wird einmal das Gesamttranskript nach ende des Meetings über die Teams Funktion zusammengefasst und anschließend mit der Live erstellen Zusammenfassung verglichen:
+
+\begin{itemize}
+    \item ROUGE(1,2,L): misst Überlappungen von Wörtern oder Phrasen zwischen Referenzzusammenfassung und Modelloutput
+    \item BERTScore: Vergleicht nicht Wörter, sondern deren semantische Einbettung
+\end{itemize}
+
+Darüber hinaus lassen sich auch mit LLM-basierten Metriken die Qualität der Zusammenfassung bewerten
+
+
+
+Testkriterien festlegen welche allgemein gültig sind und immer zurate gezogen werden um vergleichbarkeit herzustellen
+
+Kurzes Meeting halten, mit Agenda. 
+Live zusammenfassung während des meetings + anschließende Zusammenfassung des Kompletten transkripts 
+Vergleich davon, gehen informationen verloren 
+Subjektiv ,
+
+Datensätze mit Meetings, allerdings nicht live sondern Fertige Transkripte
+Eigene Meetings aufnehmen

@@ -1,0 +1,200 @@
+\documentclass[12pt,oneside,					% 1 bzw. 2-seitiger Druck				
+parskip=half, 				% definiert Absätze (false[default]/half/full oder true/false)
+captions=tableabove, 		% Tabellenüberschriften
+captions=figurebelow, 		% Bildunterschriften
+open=any,                   % Neue Kapitel drüfen rechts und links beginnen
+titlepage=firstiscover,     % Titelseite auf 1. Seite
+final  %final/ draft		% draft/final entscheidet z.B. ob Bilder drin sind oder nur sw-dummy
+]{scrbook} % scrbook aus KOMA, empfohlen, da europäisch angepasst (oder scrartcl)
+
+
+%%% Eingabe weiterer Pakete zur Anpassung
+\usepackage{setspace}		% Zeilenabstände
+\onehalfspacing				% nicht direkt 1,5-facher WORD-Abstand!
+\usepackage[english, ngerman]{babel} 						% neue Rechtschreibung durch n(ew)german (auch Silbentrennung), letzte Sprache ist Hauptsprache
+\usepackage[utf8]{inputenc}  								% inputencoding [eingabecodierung, enthält z.B. ß,ö,ä,...]
+\usepackage[T1]{fontenc} 									% fontencoding (Zeichensatz, Ausgabe)
+\usepackage[autostyle=true,german=guillemets]{csquotes} 	% korrekte Zitierart in allen babel-Sprachen --> \enquote; ohne guillemets: Hochkommata
+\usepackage[newcommands] {ragged2e} 						% Silbentrennung, bei rechts-/ linksbündig
+\usepackage{array} 											% für Tabellen und auch Mathe möglich; empfohlen: immer verwenden!
+\usepackage{booktabs} 										% für Striche  in Tabellen in 3 versch. Dicken
+\usepackage{graphicx}										% für Bilder (jpg,png,pdf)
+\graphicspath{{../Bilder/}}
+\usepackage{xcolor} 										% für Farben (rgb,  RGB, CMYK, cmyk, named, HTML,...) ; kleine Buchstaben: [%], große: [8Bit, also 0...255]
+\usepackage{wrapfig} 										% von text umflossene Bilder
+\usepackage[style=numeric]{biblatex} 						% Quellenverweise
+\usepackage[intoc,german]{nomencl} 							% Nomenklatur, Fremdwortverzeichnis --> vor dem Text!
+\makenomenclature
+\usepackage[locale = DE, per-mode = symbol]{siunitx} 					% für die einfachere Eingabe von Einheiten: \SI{30}{\meter}; Es gibt Einstellmöglichkeiten --> Dokumentation (cmd, dann texdoc NamedesPakets)
+\usepackage{amsmath} 										% komplexere Mathe möglich
+\renewcommand{\theequation}{\arabic{equation}}				% Gleichungsnummern kapitelunabhängig durch modifikation d. Counters
+\usepackage{enumitem}										% Anpassbare Aufzählung mit enumerate
+\usepackage{lmodern}										% druckt "normal" dicken Text
+%\newcommand{\RN}[1]{\uppercase\expandafter{\romannumeral#1}} % große röm. Zahlen
+\usepackage{xspace} % für C++
+\usepackage{amsmath} % schöne Matrixdarstellung
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{float}
+
+% Define colors for code highlighting
+\definecolor{keyword}{RGB}{0,0,255} % Blue for keywords
+\definecolor{comment}{RGB}{0,128,0} % Green for comments
+\definecolor{string}{RGB}{163,21,21} % Red for strings
+\definecolor{background}{RGB}{240,240,240} % Light gray background
+\definecolor{lightgray}{rgb}{.9,.9,.9}
+\definecolor{darkgray}{rgb}{.4,.4,.4}
+\definecolor{purple}{rgb}{0.65, 0.12, 0.82}
+\definecolor{blue}{rgb}{0.1, 0.1, 0.9}
+\definecolor{red}{rgb}{0.8, 0.1, 0.1}
+
+
+% Global style (base style for all listings)
+\lstdefinestyle{globalstyle}{
+    backgroundcolor=\color{lightgray}, % Light gray background
+    basicstyle=\ttfamily\footnotesize, % Monospace font, smaller size
+    frame=single,                      % Add a frame around the content
+    breaklines=true,                   % Wrap long lines
+    captionpos=b,                      % Caption at the bottom
+    numbers=left,                      % Line numbers on the left
+    numberstyle=\tiny\color{darkgray}, % Small font for line numbers
+    showspaces=false,                  % Don't show spaces
+    showstringspaces=false,            % Don't show spaces in strings
+    tabsize=4                          % Tab size
+}
+\lstset{style=globalstyle} % Set global style
+
+% Python-specific style
+\lstdefinestyle{pythonstyle}{
+    keywordstyle=\color{blue}\bfseries, % Blue, bold keywords
+    stringstyle=\color{red},           % Red for strings
+    commentstyle=\color{green}\itshape, % Green, italic comments
+}
+
+% TypeScript-specific style
+\lstdefinestyle{typescriptstyle}{
+    keywordstyle=\color{purple}\bfseries, % Purple, bold keywords
+    stringstyle=\color{orange},           % Orange for strings
+    commentstyle=\color{gray}\itshape,    % Gray, italic comments
+}
+
+% Logfile-specific style
+\lstdefinestyle{logfilestyle}{
+    basicstyle=\ttfamily\small,          % Monospace font, slightly larger size
+    backgroundcolor=\color{white},       % White background
+    commentstyle=\color{red},            % Red for comments (e.g., ERROR)
+    keywordstyle=\color{black},          % Black for general text
+    frame=none,                          % No frame for log files
+    numbers=none                         % No line numbers
+}
+
+% Python language definition
+\lstdefinelanguage{Python}{
+    keywords={def, return, if, else, for, while, import, from, as, class, self, lambda, try, except},
+    ndkeywords={True, False, None},
+    sensitive=true,
+    comment=[l]{\#},
+    stringstyle=\color{red}\ttfamily,
+    morestring=[b]',
+    morestring=[b]",
+}
+
+% TypeScript language definition
+\lstdefinelanguage{TypeScript}{
+    keywords={interface, export, string, number, boolean, let, const, async, await, function, return, if, else, for, while, switch, case, break},
+    ndkeywords={class, readonly, implements, extends, private, public, protected, static, declare, type, enum, namespace, module, from, as},
+    sensitive=true,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    stringstyle=\color{orange}\ttfamily,
+    morestring=[b]',
+    morestring=[b]",
+    morestring=[b]`
+}
+
+\usepackage[pdfpagelayout=TwoPageLeft]{hyperref} 										% klickbare Links/URLs --> sollte letztes Paket sein!! href ermöglicht externe Adressen zu verlinken; \hypersetup{keyvals} ermöglich Optionen 
+\usepackage[all]{hypcap} 									% sorgt für 
+
+
+%% Neuen Spaltentyp definieren
+\newcolumntype{H}{%
+	>{\footnotesize} c} % Header
+
+%% Definition der Daten für die Titelseite
+\author{Yan Ohainski} 
+\title{Entwicklung eine KI-basierten Meetingassistenten zur Darstellung und Aufbereitung gesprochener Inhalte}
+%\subtitle{Simulation in MATLAB Simulink} 
+\date{\today}
+%\titlehead{Titelkopf}
+\subject{%\newpage
+	Masterarbeit}
+
+\publishers{
+	\vspace{1.0cm}
+	an der Hochschule für angewandte Wissenschaft und Kunst
+ 
+    Prüfer:
+    
+    Prof. Dr. rer. nat. Roman Grothausmann
+    
+    Betreuer:
+    
+	Henri Reumschüssel
+	
+	\vspace{3cm}
+	\centering
+	\includegraphics[height=3.cm]{Bilder/hawk-fi-logo.pdf}\\
+}	
+
+
+
+%Literaturdatenbank verlinken
+%\addbibresource{lib_masterarbeit.bib}
+
+%Fremdwortverzeichnis 
+\PassOptionsToPackage{intoc,nomentbl}{nomencl}
+\renewcommand{\nomname}{Fremdwortverzeichnis}
+\newcommand{\fremdwort}[2]{#1\nomenclature{\textbf{#1}}{#2}}
+
+
+
+%Gleichungsnummerierung
+\numberwithin{equation}{chapter} %sets equation numbers
+
+
+
+\begin{document} 
+\setcounter{tocdepth}{1} % Tiefe des Inhaltsverzeichnis einstellen: nur caption und section
+\maketitle				% Titelseite einfügen
+%\input{Deckblatt}
+
+%\thispagestyle{empty}
+%\mbox{}
+
+\frontmatter			% erste Seiten römisch nummerieren
+
+% Inhalts-, Tabellen-, Bild-, Fremdwortverzeichnis
+\tableofcontents
+
+\listoftables
+\addcontentsline{toc}{chapter}{Tabellenverzeichnis}
+\listoffigures
+\addcontentsline{toc}{chapter}{Abbildungsverzeichnis}
+% \printnomenclature
+%\addcontentsline{toc}{chapter}{Eigenständigkeitserklärung \& Nutzungsrecht}	 	
+\input{Selbstständigkeit}
+
+\mainmatter				% Ab hier arabische Nummerierung
+
+%% Die einzelnen Teile einfügen
+\include{01_Einleitung}
+\include{02_Grundlagen}
+\include{03_Methodik}
+\include{04_Implementierung}
+\include{05_Ergebnisse}
+\include{06_Schluss}
+
+% Literaturverzeichnis
+\printbibliography
+
+\end{document}
