@@ -54,23 +54,31 @@ Die Entwicklung der Spracherkennung begann in den 1950er-Jahren mit regelbasiert
 Moderne STT-Systeme basieren überwiegend auf Deep-Learning-Architekturen, die akustische Merkmalsrepräsentationen – meist in Form von Mel-Spektrogrammen – verarbeiten. Dabei lassen sich zwei grundlegende Schritte unterscheiden:
 
 \begin{itemize}
-    \item 
-    Akustische Merkmalsextraktion:
-Das kontinuierliche Audiosignal wird segmentiert und in ein Log-Mel-Spektrogramm überführt, das die zeit-frequenzbasierte Struktur des Sprachsignals abbildet (Oppenheim & Schafer, 2010).
-\item Sequenzmodellierung und Dekodierung:
-Ein neuronales Modell erzeugt aus diesen Merkmalen eine Token-Sequenz, die anschließend zu Text zusammengesetzt wird. Moderne Modelle nutzen hierfür Transformer-Architekturen, da diese besonders gut mit langen Kontexten und sequentiellen Abhängigkeiten umgehen können (Vaswani et al., 2017).
+    \item Das kontinuierliche Audiosignal wird segmentiert und in ein Log-Mel-Spektrogramm überführt, das die zeit-frequenzbasierte Struktur des Sprachsignals abbildet (Oppenheim & Schafer, 2010).
+  
+    \item Sequenzmodellierung und Dekodierung:Ein neuronales Modell erzeugt aus diesen Merkmalen eine Token-Sequenz, die anschließend zu Text zusammengesetzt wird. Moderne Modelle nutzen hierfür Transformer-Architekturen, da diese besonders gut mit langen Kontexten und sequentiellen Abhängigkeiten umgehen können (Vaswani et al., 2017).
 \end{itemize}
 
-Speech-to-Text (STT) auch Automatic Speech Recognition (ASR) beschreibt alle rechnergestützten Verfahren zur automatisierten Umwandlung gesprochener Sprache in schriftliche Form. Ziel ist die robuste Erkennung von Sprache, deren korrekter Interpretation sowie Generierung einer konkreten Textrepräsentation. 
+Ein aktueller Vertreter moderner STT-Systeme ist Whisper, das 2022 von OpenAI veröffentlicht wurde (Radford et al., 2022). Whisper ist ein Encoder-Decoder-Transformer, dessen Architektur ursprünglich aus der maschinellen Übersetzung stammt, jedoch für Audio- statt Texteingaben angepasst wurde.
 
-Das Modell Whisper wurde 2022 von OpenAI veröffetnlicht und ist im wesentlichen ein Encoder-Decoder-Transformermodell, welches mit annotierten Audiodaten Trainiert wurde. Dabei verarbeitet der Encoder anstatt Text, Mel-Sektrogramme des Audios mit welchem der Decoder anschließend Text-Tokens verarbeitet. 
+\begin{itemize}
+    \item Encoder: Der Encoder verarbeitet 30-Sekunden-Chunks eines Log-Mel-Spektrogramms und überführt diese in eine latente Repräsentation des Audios. Damit fungiert er als akustisches Modell, das sprachliche Merkmale abstrahiert und relevante Informationen extrahiert.
+    \item Decoder: Der Decoder generiert auf Grundlage der Encoder-Repräsentation Text-Tokens. Die Arbeitsweise ähnelt einem Sprachmodell, wobei der Decoder zusätzlich akustische Kontextinformationen berücksichtigt.
+\end{itemize}
 
-Whisper wurde mit etwa 680.000 Stunden multilingualem Audiomaterial trainiert, was es zu einem guten Foundation Modell im Bereich der ASR macht. Durch Finetuning von Whisper lässt sich das Modell darüber hinaus weiter an eigene Bedürfnisse anpassen. 
+Whisper wurde auf rund 680.000 Stunden multilingualer, teils schwach annotierter Audiodaten trainiert – eine Größenordnung, die im Bereich der ASR außergewöhnlich hoch ist (Radford et al., 2022). Durch diese heterogene Datensammlung zeichnet sich das Modell durch hohe Robustheit gegenüber Akzenten, verschiedenen Aufnahmebedingungen und Hintergrundgeräuschen aus.
 
+Das Modell wird in verschiedenen Größen (tiny bis large) bereitgestellt, was unterschiedliche Anforderungen hinsichtlich Genauigkeit und Rechenaufwand ermöglicht. Die größte Variante erreicht in vielen Sprachen nahezu menschliche Genauigkeiten in der Transkription.
 
-Encoder: Wandelt das Audiosignal (Mel-Spektogramm) in eine latente Repräsentation um. 
+Da Whisper ein Foundation-Modell ist, lässt es sich durch Finetuning an spezifische Anwendungsfälle anpassen. Beim Finetuning wird das vortrainierte Modell auf eine kleinere, domänenspezifische Datenbasis weitertrainiert, um Besonderheiten eines Fachbereichs, einer Sprache, eines Dialekts oder einer spezifischen Akustik zu berücksichtigen (Prabhavalkar et al., 2023).
 
-Decoder: Erzeugt auf Basis dieser Repräsentation Text-Token ähnlich wie ein Sprachmodell. 
+Im Rahmen des Masterprojekts (Verweis auf eigenen Projektrahmen) wurde Whisper – bzw. eine optimierte Implementierung wie Faster-Whisper – auf einem spezifischen Datensatz weitertrainiert. Dieser Prozess umfasst typischerweise:
+
+\begin{itemize}
+    \item Vorbereitung und Normalisierung eines transkribierten Audio-Text-Korpus
+    \item Umwandlung der Audiodaten in Whisper-kompatible Mel-Spektogramme
+    \
+\end{itemize}
 
 \section{Large-Language-Model}
 Large Language Models (LLMs) sind tiefenlernende neuronale Netze, die auf umfangreichen Sammlungen natürlicher Sprachdaten trainiert werden, um sowohl sprachliches Verständnis als auch generative Fähigkeiten zu entwickeln. Im Gegensatz zu älteren, stärker auf spezifische Aufgaben zugeschnittenen NLP-Modellen entstehen durch das Training auf breit gefächerten Textkorpora allgemeine, domänenübergreifende Sprachfertigkeiten. Daher werden moderne LLMs häufig als Foundation Models bezeichnet, da sie eine vielseitige Grundlage für eine Vielzahl nachgelagerter Anwendungen bieten (Zhao et al., 2023; Minaee et al., 2024).
