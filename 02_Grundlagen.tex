@@ -47,13 +47,19 @@ Darüber hinaus lassen sich Transformer auch für andere Zwecke einsetzten als z
 
 
 \section{Speech-to-Text}
-Speech to text bezeichnet die technik um aus gesprochenem inhalt 
-Was ist das? Wie funktiniert das? Welche Technik wird hier verwendet? 
-Verweis auf Masterprojekt. Wie wurde ausgewähltes Modell feingetuned, bzw wie wird es finegetuned. 
-Whisper funktioniert wie ein Transformer, bei dem anstatt wörtern log mel spektogramme ein
-Kann ins Detail gehen
-Kurz anreißen wie sich technik entwickelt hat, ohne zu sehr ins Detail zu gehen, keine größere Relevanz
-Faster Whisper, welches auf Whisper basiert (lediglich inferenz ist anderes) 
+Speech-to-Text (STT), auch als Automatic Speech Recognition (ASR) bezeichnet, umfasst alle rechnergestützten Verfahren zur automatisierten Umwandlung gesprochener Sprache in schriftliche Form. Ziel dieser Systeme ist es, das akustische Sprachsignal zuverlässig zu erfassen, linguistisch zu interpretieren und in eine korrekte Textrepräsentation zu überführen (Juang & Rabiner, 2005). Moderne STT-Systeme kommen in zahlreichen Anwendungsbereichen zum Einsatz, etwa in Assistenzsystemen, Untertitelung, Barrierefreiheit, Dokumentationsprozessen oder der multimodalen Mensch-Maschine-Interaktion.
+
+Die Entwicklung der Spracherkennung begann in den 1950er-Jahren mit regelbasierten Ansätzen zur Erkennung isolierter Wörter. Mit dem Aufkommen probabilistischer Verfahren – insbesondere Hidden Markov Models (HMM) – etablierte sich ab den 1970er-Jahren ein Standardansatz zur Modellierung zeitlicher Abhängigkeiten in Sprachsignalen (Rabiner, 1989). Ab etwa 2010 führte der Einsatz von Deep Learning und End-to-End-Modellen, insbesondere CTC-basierten und später Transformer-basierten Architekturen, zu erheblichen Leistungssteigerungen (Hinton et al., 2012; Graves et al., 2006). Seit der Veröffentlichung großer multilingualer Foundation-Modelle wie wav2vec 2.0 (Baevski et al., 2020) oder Whisper (Radford et al., 2022) dominieren zunehmend generalisierbare, robust trainierte Systeme das Feld.
+
+Moderne STT-Systeme basieren überwiegend auf Deep-Learning-Architekturen, die akustische Merkmalsrepräsentationen – meist in Form von Mel-Spektrogrammen – verarbeiten. Dabei lassen sich zwei grundlegende Schritte unterscheiden:
+
+\begin{itemize}
+    \item 
+    Akustische Merkmalsextraktion:
+Das kontinuierliche Audiosignal wird segmentiert und in ein Log-Mel-Spektrogramm überführt, das die zeit-frequenzbasierte Struktur des Sprachsignals abbildet (Oppenheim & Schafer, 2010).
+\item Sequenzmodellierung und Dekodierung:
+Ein neuronales Modell erzeugt aus diesen Merkmalen eine Token-Sequenz, die anschließend zu Text zusammengesetzt wird. Moderne Modelle nutzen hierfür Transformer-Architekturen, da diese besonders gut mit langen Kontexten und sequentiellen Abhängigkeiten umgehen können (Vaswani et al., 2017).
+\end{itemize}
 
 Speech-to-Text (STT) auch Automatic Speech Recognition (ASR) beschreibt alle rechnergestützten Verfahren zur automatisierten Umwandlung gesprochener Sprache in schriftliche Form. Ziel ist die robuste Erkennung von Sprache, deren korrekter Interpretation sowie Generierung einer konkreten Textrepräsentation. 
 
