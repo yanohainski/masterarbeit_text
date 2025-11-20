@@ -25,18 +25,13 @@ Der Decoder – bzw. analog der Encoder – nutzt daraufhin den Selbstaufmerksam
 
 Im Anschluss an die Aufmerksamkeitsschicht werden die resultierenden Vektoren zu einer konsolidierten Repräsentation zusammengeführt und an ein positionseise arbeitendes Feed-Forward-Netzwerk übergeben. Dieses besteht typischerweise aus zwei linearen Transformationen und einer nichtlinearen Aktivierungsfunktion (z. B. ReLU oder GELU). Das Feed-Forward-Netzwerk erweitert die Modellkapazität erheblich, da es die Komplexität erhöht, mit der Muster aus den Daten gelernt werden können, und trägt maßgeblich zur Ausdrucksstärke der gesamten Architektur bei.
 
-Nachdem Alle schichten durchlaufen wurden, wird die Sequenz an ein finales neuronales netzt übergeben
-dieses berechnet die wahrscheinlichkeit für das nächste zu gernerieende Token
+Nachdem alle Schichten des Transformers durchlaufen wurden, gelangt die resultierende Repräsentation in ein abschließendes lineares Ausgabelayer. Dieses Layer projiziert den internen Zustandsvektor auf den gesamten Modellwortschatz und berechnet für jedes bekannte Token die Wahrscheinlichkeit, als nächstes generiert zu werden. Die Anzahl der Ausgabeknoten entspricht somit der Größe des Vokabulars.
 
-Besonders GPT 
-Generative Pretrained Transformer
+Mittels einer Softmax-Funktion werden die berechneten Werte in eine normalisierte Wahrscheinlichkeitsverteilung über alle möglichen Folgetoken umgewandelt. Das Token mit der höchsten Wahrscheinlichkeit – oder ein Token, das gemäß einer stochastischen Sampling-Strategie ausgewählt wird – bildet schließlich die nächste Ausgabe des Modells.
 
-Vortraining und Finetuning
+Das neu generierte Token wird anschließend an die bisherige Sequenz angehängt und erneut in das Modell eingespeist. Dieser autoregressive Prozess wird so lange wiederholt, bis entweder eine vorgegebene maximale Sequenzlänge erreicht ist oder ein spezielles Stop-Token generiert wird.
 
-Anwendungsbereiche für Transformer und bekannte Modelle mit Transformer Architektur
-Nachteile im Vergleich zu anderen KI-Modellen 
-Darüber hinaus lassen sich Transformer auch für andere Zwecke einsetzten als zur NLP. Transformer werden allerdings nicht ausschließlich für NLP verwendet und finden auch Anwendung in bereichen wie Bildverarbeitung und Audioverarbeitung
--> Whisper als Text to Speech Transformer modell 
+Neben der Textverarbeitung finden Transformer zunehmend Anwendung in weiteren Bereichen. In der Bildverarbeitung ersetzen Vision Transformer (ViT) klassische Convolutional Neural Networks, indem sie Bildpatches analog zu Tokensequenzen verarbeiten. In der Audioverarbeitung werden Transformer zur automatischen Spracherkennung, zur Klangklassifikation oder zur Sprachsynthese eingesetzt. Ein prominentes Beispiel ist Whisper, ein Transformer-basiertes Modell zur automatischen Spracherkennung (ASR). Obwohl Whispers Architektur ursprünglich aus der NLP-Forschung stammt, demonstriert es eindrucksvoll, dass Transformer universell auf zeitvariante Signale angewendet werden können.
 
 
 \section{Speech-to-Text}
@@ -140,53 +135,30 @@ Bei Gesprächs- oder Transkript-Daten wie bei der Verwendung von Speech to Text 
 
 
 \subsection{Rolling Summary}
-Was ist das? Wie Funktioniert ds und wie lässt sich das 
-Mehrstufige Zusammenfassung, Text wird nicht in eins zusammengefasst sondern vorher in chunks/Teilstücke aufgeteilt, welche einzeln zusammengefasst werden. Text wird schrittweise verdichtet
+Die Rolling Summary – häufig auch als mehrstufige, hierarchische oder inkrementelle Summarisierung bezeichnet – beschreibt ein Verfahren zur fortlaufenden Verdichtung von Texten, die entweder sehr lang sind oder kontinuierlich anfallen. Im Gegensatz zu klassischen Summarisierungsansätzen, bei denen ein Text in seiner Gesamtheit verdichtet wird, basiert die Rolling Summary auf einer schrittweisen Informationsverarbeitung. Der Eingangstext wird zunächst in kleinere Abschnitte (Chunks) aufgeteilt, anschließend separat zusammengefasst und schließlich über mehrere Ebenen hinweg zu einer konsistenten Gesamtsummary aggregiert. Dieses Vorgehen folgt dem Prinzip „split–summarize–aggregate“ und ist besonders geeignet für Inhalte, die von Natur aus segmentiert oder zeitlich verteilt vorliegen – etwa Chatverläufe, Dokumentensammlungen oder Meeting-Transkripte.
 
-Eignet sich gut bei Texten oder Daten, welche in vielen kleinen Segmenten vorliegt. (Chatverläufe, Dokumentensammlung oder Meeting Transkripte)
+Grundlage des Verfahrens ist die Idee, große Informationsmengen zunächst lokal zu verdichten und erst danach global zu konsolidieren. Zunächst wird der Text in inhaltlich oder zeitlich definierte Chunks unterteilt. Jeder dieser Abschnitte wird einzeln zu einer Kurzfassung verarbeitet. Diese sogenannten Mini-Summaries bilden die unterste Ebene der Hierarchie. Anschließend werden mehrere dieser Kurzfassungen zu größeren Abschnitten zusammengeführt und erneut zusammengefasst. Dieser Vorgang kann über mehrere Stufen hinweg wiederholt werden, bis schließlich eine kompakte Gesamtsummary vorliegt, die die wichtigsten Kernaussagen aller Teilbereiche integriert. Ansätze wie „SummN“ (Zhang et al., 2022) oder hierarchische Transformer-Modelle (Liu Lapata,2019) demonstrieren die Wirksamkeit solcher stufenweisen Methoden, sowohl für lange Dokumente als auch für umfangreiche Dialoge. Ähnliche coarse-to-fine-Strategien mit semantischen Blöcken wurden etwa von Liang et al.(2022) untersucht.
 
-1. Text wird in Chunks aufgeteilt, 
-2. Chunks werden einzeln zusammengefasst 
-3. Teilzusammenfassungen werden anschließend wieder zusammengefasst 
-4. Finale verdichtung: Es entsteht eine kompakte Gesamtzusammenfassung, welche die wichtigsten Kernaussagen aller Teile enthält. 
+Ein besonders relevanter Spezialfall der Rolling Summary ist die inkrementelle Roll-Up-Summarisierung, die für kontinuierliche oder Streaming-Daten entwickelt wurde. Hier wird die Gesamtsummary fortlaufend aktualisiert: Für jeden neuen Chunk entsteht zunächst eine lokale Kurzfassung, die anschließend mit der bisherigen Gesamtsummary fusioniert wird. Das Ergebnis ist eine dynamische, zeitabhängige Zusammenfassung, die sich mit dem Gespräch oder Vortrag weiterentwickelt. Dieses Vorgehen wird insbesondere in der Meeting- und Speech-Summarization erforscht. Manuvinakurike et al. (2021) zeigen, wie Gesprächsinhalte Schritt für Schritt „temporär“ zusammengefasst werden können. Methoden wie BASS (Sharma et al., 2023) oder Sen-SSum (2024) verfolgen ähnliche Ziele für Sprachdaten, indem sie block- bzw. satzweise aktualisierte Summaries generieren. Neuere Arbeiten wie jene von Hwang et al. (2024) schlagen sogar strukturierte Gedächtnisrepräsentationen vor, um Drift und Redundanz im Zeitverlauf zu reduzieren.
 
-Incremental rollup summarization
+Die Rolling Summary bietet eine Reihe von Vorteilen. Besonders hervorzuheben sind Skalierbarkeit und Speichereffizienz. Da nur kleine Teile des Textes gleichzeitig verarbeitet werden müssen und Zwischenzusammenfassungen kompakt bleiben, lässt sich das Verfahren auch bei sehr langen Dokumenten oder Echtzeitdaten anwenden. Zudem ermöglicht die mehrstufige Aggregation eine flexible Anpassung der Abstraktionstiefe: Informationsdichte und Detailgrad können auf jeder Stufe kontrolliert gesteuert werden.
 
-Beispielbild 
-
-Vorteile: Skalierbarkeit, Speichereffizienz 
-Nachteile: möglicher Informationsverlust, Bias Kaskade (Fehler oder Gewichtungen aus unteren Stufen ziehen sich bis nach oben) 
-
-Balancierung, Wie stark soll jeder Chunk zusammengefasst werden? Oberflächlichkeit vs Redundanz 
+Gleichzeitig bringt die Methode auch Herausforderungen mit sich. Durch die wiederholte Verdichtung besteht ein Risiko, dass Informationen verloren gehen oder wichtige Details in frühen Stufen eliminiert werden. Ebenso kann es zu einer sogenannten Bias-Kaskade kommen: Fehler oder Gewichtungen auf tieferen Ebenen setzen sich nach oben fort und beeinflussen so die spätere Gesamtsummary. Darüber hinaus verlangt das Verfahren eine sorgfältige Balancierung zwischen Kompressionsstärke und Informationsgehalt. Wird jeder Chunk zu stark verdichtet, entsteht eine oberflächliche Gesamtsummary; wird zu wenig verdichtet, wächst die Summary übermäßig und verliert ihren Zweck. Auch die Wahl der Chunk-Größe spielt eine entscheidende Rolle: Kürzere Chunks erhöhen die Aktualität und eignen sich gut für Echtzeitanwendungen, enthalten jedoch weniger kontextuelle Information; längere Chunks erhöhen die Dichte der Informationen, gehen aber zulasten der Reaktionszeit.
 
 
 \section{Prompt Engineering}
-Was das und wie wird es hier mit eingebracth? 
-Verschiedene Arten von Prompts: 
--Benutzerprompt -> Anweisungen vom Benutzer
--Systemprompt -> Instruktionen für bestimmte KI-Agenten, wird dem Nutzer nicht angezeigt
--Agentenprompt -> Ausgabe des KI-Agenten
+Prompt Engineering bezeichnet das gezielte Gestalten von Eingabeaufforderungen („Prompts“) für LLMs, um gewünschte Ausgaben zu erzeugen, ohne die Modellparameter selbst zu verändern (Sahoo et al., 2024). Prompts können in unterschiedlichen Formen auftreten – etwa als natürlichsprachliche Anweisungen, als Input-Output-Beispiele oder als sogenannte „Soft Prompts“ in Vektor­repräsentation (Chen et al., 2023). Ziel ist es, bereits vortrainierte Modelle durch geeignete Eingabe­gestaltung auf spezifische Aufgaben anzuwenden, wodurch umfangreiches Feintuning entfällt oder reduziert werden kann. So lässt sich die vorhandene Kapazität des Modells effizienter nutzen.
 
-Gezielte Gestalten von Eingabeaufforderungen ("Prompts") für Large Language Modelle um gewünschte Ausgabe zu erzielen ohne Modellparameter zu verändern. (A Systematic Survey of Prompt Engineering in Large Language Models: Techniques and Applications)
-Prompts können in verchiedenen Formen auftreten wie natürlicher sprache, Beispielen oder als soft Prompts in Vektorrepräsentation vorliegen. 
+In der Praxis unterscheidet man verschiedene Arten von Prompts:
+\begin{itemize}
+    \item Benutzerprompts – Anweisungen, die direkt vom Benutzer stammen.
+    \item Systemprompts – verborgene Instruktionen, die das Verhalten eines KI-Systems steuern.
+    \item Agentenprompts – Ausgaben eines KI-Agenten, die wiederum als Eingabe für weitere Prozesse dienen können.
+\end{itemize}
 
-Ziel: Mithilfe von geschicktem Prompt engineering beretis vortrainierte Modelle auf spezifische Aufgaben anzusetzen ohne Feintuning großer Parameter (Unleashing the potential of prompt engineering for large language models)
+Zu den gängigen Strategien zählen Zero-Shot Prompting, bei dem das Modell nur eine Aufgabenbeschreibung erhält, Few-Shot Prompting mit wenigen Beispielpaaren zur Orientierung, sowie Chain-of-Thought (CoT) Prompting, das das Modell zu einer schrittweisen Herleitung seiner Antwort anregt (Schulhoff et al., 2024).
 
-Prompt Engineering spart zeit, da umfangreiches Feintuning reduziert werden kann oder ganz wegfällt. Vorhandene Kapazität des LLMs wird durch geschickte Eingaben genutzt. 
-
-Zero-Shot-Prompting: Modell erhält nur eine Aufgabenstellung ohne Beispiele
-Few Shot Prompting: Modell erhält wenige Beispielpaare (Input-Output) um sich zu Orientieren
-Chain-of-Thought (Cot) Prompting: 
-
-Qualität des Prompts hängt stark von Formulierung, Klarheit, Kontext und Beispielwahl ab. Unterschiedliche formulierungen können zu sehr unterschiedlichen resultaten Liefern (The Prompt Report: A Systematic Survey of Prompt Engineering Techniques)
-Prompts sind Modellspezifisch, ein prompt der bei modell a gut funktioniert muss nicht bei modell b funktionieren 
-Evaluation schwierig: Es existieren noch nicht immers tandardisierte Metriken. Wie wird ein "guter" Prompt gemessen. (Sehr Subjektiv)
-(A Systematic Survey of Prompt Engineering in Large Language Models: Techniques and Applications) 
-
-"Mehr ist nicht immer besser" -> Mehr Beispiele oder Längerer Kontext führt nicht automatisch zu besseren Ergebnissen. Effekte von Übertransfer oder Ablenkung 
-
-(A Systematic Survey of Prompt Engineering in Large Language Models: Techniques and Applications) - Gibt eine Liste mit vielen Techniken für LLMs an 
-
+Die Qualität eines Prompts hängt wesentlich von Formulierung, Klarheit, Kontext und Beispielwahl ab – schon kleine Änderungen können zu deutlich unterschiedlichen Ergebnissen führen (Schulhoff et al., 2024). Zudem sind Prompts stark modellspezifisch: Ein erfolgreicher Prompt für Modell A liefert nicht zwingend gute Resultate bei Modell B. Die Bewertung guter Prompts bleibt schwierig, da es bislang keine standardisierten Metriken gibt und qualitative Urteile oft subjektiv ausfallen (Sahoo et al., 2024). Darüber hinaus gilt: Mehr Beispiele oder längere Kontexte führen nicht zwangsläufig zu besseren Ergebnissen; zu viele Informationen können den Output sogar verschlechtern (Overtransfer-Effekte).
 
 
 \section{Weitere Hilfsmittel und Tools}
