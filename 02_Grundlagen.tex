@@ -69,7 +69,7 @@ Im Rahmen des Masterprojekts (Verweis auf eigenen Projektrahmen) wurde Whisper �
     \item Evaluation auf Validierungsdaten und ggf. Anpassung der Hyperparameter
 \end{itemize}
 
-Faster-Whisper basiert architektonisch vollständig auf Whisper, verwendet jedoch eine optimierte Inferenz-Engine (z. B. CTranslate2), wodurch die Transkriptionsgeschwindigkeit erheblich erhöht wird, ohne Änderungen am zugrundeliegenden Modell vorzunehmen (Kreutzer et al., 2023).
+Faster-Whisper basiert architektonisch vollständig auf Whisper, verwendet jedoch eine optimierte Inferenz-Engine (z. B. CTranslate2), wodurch die Transkriptionsgeschwindigkeit erheblich erhöht wird, ohne Änderungen am zugrundeliegenden Modell vorzunehmen.
 
 \section{Large-Language-Model}
 Large Language Models (LLMs) sind tiefenlernende neuronale Netze, die auf umfangreichen Sammlungen natürlicher Sprachdaten trainiert werden, um sowohl sprachliches Verständnis als auch generative Fähigkeiten zu entwickeln. Im Gegensatz zu älteren, stärker auf spezifische Aufgaben zugeschnittenen NLP-Modellen entstehen durch das Training auf breit gefächerten Textkorpora allgemeine, domänenübergreifende Sprachfertigkeiten. Daher werden moderne LLMs häufig als Foundation Models bezeichnet, da sie eine vielseitige Grundlage für eine Vielzahl nachgelagerter Anwendungen bieten (Zhao et al., 2023; Minaee et al., 2024).
@@ -88,51 +88,35 @@ Bei der verarbeitung von Sprache und Text mithilfe von KI gibt es verschiedene M
 Extractive und abstractive Summary 
 
 \subsection{Segmentation}
-Zerteilung von Texten in kleinere, verarbeitbare Einheiten (Segmente) bevor LLM den Inhalt analysiert oder Zusammenfasst
+Im Bereich der Sprachverarbeitung spielt die Segmentierung von Texten eine zentrale Rolle, insbesondere als Vorbereitungsschritt für große Sprachmodelle (LLMs). Dabei wird ein Text in kleinere, verarbeitbare Einheiten zerlegt, bevor ein Modell den Inhalt analysiert, interpretiert oder zusammenfasst. Diese Aufteilung ist notwendig, weil Sprachmodelle nur eine begrenzte Kontextlänge – gemessen in sogenannten Tokens – verarbeiten können. Wird diese Grenze überschritten, kann das Modell nicht mehr auf den gesamten Inhalt zugreifen; wichtige Zusammenhänge gehen verloren oder werden unvollständig berücksichtigt.
 
-Modelle haben nur begrenzte Kontextlänge (Tokens), wird die Kontextlänge überschritten, kann das Modell den Inhalt nicht komplett verarbeiten
+Um dieses Problem zu vermeiden, wird der Text in logisch und semantisch sinnvolle Abschnitte unterteilt, beispielsweise in Absätze, Kapitel oder Themenblöcke. Ziel ist es, die Struktur des Inhalts zu bewahren und gleichzeitig die technischen Beschränkungen des Modells zu berücksichtigen.
 
+Grundsätzlich lassen sich zwei Hauptansätze der Segmentierung unterscheiden: Fixed Size Segmentation und Semantic Segmentation.
 
+Bei der Fixed Size Segmentation wird der Text nach einer festgelegten Tokenzahl oder Wortlänge aufgeteilt. Dieses Verfahren ist einfach umzusetzen und rechnerisch effizient, ignoriert jedoch den semantischen Zusammenhang im Text. Dadurch kann es vorkommen, dass ein Segment mitten in einem Satz, Argument oder Kapitel endet – was die inhaltliche Kohärenz stört.
 
-Text wird in logisch sinnvolle einheiten aufgeteilt, Absätze, Kapitel, Themenblöcke
-Fixed Size Segmentation: Text wird nach einer Bestimmten Tokenzahl geteilt, recht einfach, geht aber nicht auf Textinhalte ein. Cut eventuell direkt im Kapitel 
-Semantic segmentation: Text wird mit inhaltlichen Grenzen getrennt. Oft mithilfe von Embeddings oder Clustering
+Die Semantic Segmentation verfolgt einen anspruchsvolleren, inhaltlich orientierten Ansatz. Hierbei werden die inhaltlichen Grenzen des Textes erkannt und als Segmentierungsstellen genutzt. Häufig erfolgt dies mithilfe von Text-Embeddings und Clustering-Verfahren.
+Ein Embedding ist eine numerische Repräsentation von Wörtern oder Textpassagen in einem Vektorraum. Wörter oder Sätze mit ähnlicher Bedeutung liegen in diesem Raum näher beieinander, während thematisch unterschiedliche Inhalte größere Abstände aufweisen. Diese Eigenschaft lässt sich gezielt nutzen, um semantische Übergänge zu erkennen:
 
-Embedding: Umwandlung von Wörtern und Text in Vektoren, Vektoren mit ähnlichem Embedding sind Inhaltlich näher beieinander als Vektoren mit großem Abstand im Embedding 
+Durch Clustering – also das Zusammenfassen ähnlicher Embeddings – können inhaltlich zusammenhängende Textstellen gruppiert werden. Die Übergänge zwischen diesen Clustern markieren dann die inhaltlichen Grenzen des Textes. Auf diese Weise entstehen semantisch homogene Segmente, die sich deutlich von rein mechanisch geschnittenen Textteilen unterscheiden.
 
-Clustering: Mehrere Embeddings die sich Ähneln werden zu einem Cluster zusammengefasst -> Semantisch homogene Segmente. 
-
--> Text lässt sich somit mit inhaltlichen Grenzen trennen
-
-
-Hybrid Ansatz, Kombination aus beidem 
+Ein Hybridansatz kombiniert schließlich beide Methoden: Zunächst wird der Text in technisch handhabbare Einheiten fester Größe geteilt, um Rechenaufwand zu begrenzen. Innerhalb dieser Abschnitte erfolgt anschließend eine feinere, semantisch fundierte Segmentierung. Dieses Verfahren vereint die Effizienz der festen Aufteilung mit der inhaltlichen Präzision der semantischen Methode und ist damit besonders geeignet für komplexe Anwendungen – etwa bei der Verarbeitung langer Transkripte oder wissenschaftlicher Texte, die von großen Sprachmodellen analysiert oder zusammengefasst werden sollen.
 
 \subsection{Kontextualisierung}
-Fähigkeit des LLMS den Sinn eines Textes im Größeren Zusammenhang zu erfassen. 
-Wichtigkeit einzelner Bereiche wird durch Kontextualisierung hervorgehoben.
-Gesamtzusammenhang wird erkannt und berücksichtigt bei der Verarbeitung
+Kontextualisierung bezeichnet die Fähigkeit großer Sprachmodelle (LLMs), den Sinn eines Textes im größeren Zusammenhang zu erfassen und diesen Gesamtzusammenhang aktiv in die Verarbeitung einzubeziehen. Dabei wird nicht nur die Bedeutung einzelner Wörter oder Sätze analysiert, sondern deren Beziehung innerhalb des gesamten Textes berücksichtigt. Durch diesen Prozess kann das Modell die Wichtigkeit einzelner Bereiche erkennen und hervorheben, was zu einer inhaltlich kohärenten, faktentreuen und qualitativ hochwertigen Verarbeitung führt.
 
-Kontext gezielt zu nutzen ist entscheidend für die Qualität, Faktentreue und Kohärenz bei LLMs und langen Dokumenten (On Context Utilization in Summarization with large language Models) 
+Die gezielte Nutzung von Kontext ist insbesondere bei langen Dokumenten entscheidend, um die Kohärenz und Faktentreue von Zusammenfassungen oder generierten Texten sicherzustellen. Studien wie On Context Utilization in Summarization with Large Language Models (Ravaut et al., 2024) zeigen, dass LLMs bei langen Eingaben häufig nur Teile des Inputs effektiv nutzen — insbesondere den Anfang und das Ende eines Textes. Inhalte in der Mitte werden hingegen oft unterrepräsentiert, was als Positionsbias bezeichnet wird. Dadurch können wesentliche Informationen verloren gehen, und wichtige Querbezüge, zeitliche Abhängigkeiten oder logische Implikationen bleiben unberücksichtigt.
 
-LLMs bei langen Eingaben oft nur Teile des Inputs effektiv nutzen, insbesondere den Anfang und das Ende. Inhalte in der Mitte bleiben unterräpresentiert (Positionsbias) 
-(On Context Utilization in Summarization with Large Language Models)
+Gerade in der Speech-to-Text-Verarbeitung spielt Kontextualisierung eine zentrale Rolle. Transkripte gesprochener Sprache sind geprägt von Sprecherwechseln, Themenwechseln und referenziellen Sprüngen, die nur mit ausreichender Kontextbetrachtung korrekt verstanden und zusammengefasst werden können. Ohne eine solche Kontextintegration verliert die Modellverarbeitung an inhaltlicher Tiefe und Genauigkeit.
 
--Wichtige Querverweise, temporale Bezüge oder Implikationen bleiben unterberücksichtigt. 
+In der Forschung werden verschiedene Formen der Kontextualisierung unterschieden:
 
-Bei Sprache zu Text spielt kontextualisierung besonders große Rolle, da es bei Transkripten oftmals Sprecherwechsel, Themenwechsel und referentielle Sprünge gibt. 
-
-Es wird zwischen verschiedenen Arten der Kontextualisierung unterschieden: 
-1. Intra-Dokument Kontext: Bezieht sich auf Zusammenhänge innerhalb eines Dokuments oder Textsequenz. Durch einbindung des Globalen Kontext lassen sich bessere Zusammenfassungen erstellen, im vergleich zur ausschließlichen Lokalen Satzbereiches 
-(Contextualized Rewriting for Text Summarization) 
-
-2. Inter Dokumentärer oder externer Kontext: 
-Dabei werden 
-
-3. Simulatane Berücksichtigung von Struktur- und Sprecherwechseln 
-Bei Gesprächs- oder Transkript-Daten wie bei der Verwendung von Speech to Text Modellen wie Whisper spielt es eine Rolle, dass da Modell versteht, wer spricht, wie Themen wechseln und Referenzen verlaufen. 
-(Context aware hierarchical attention for abstractive dialogue summarization)
-
-
+\begin{itemize}
+    \item Intra-dokumentarer Kontext bezieht sich auf Zusammenhänge innerhalb eines einzelnen Dokuments oder einer Textsequenz. Dabei werden Beziehungen zwischen Sätzen, Absätzen und Themenverläufen berücksichtigt. Arbeiten wie Contextualized Rewriting for Text Summarization (BaoZhang, 2021) zeigen, dass durch die Einbindung des globalen Kontexts deutlich bessere Zusammenfassungen entstehen als bei einer reinen Betrachtung lokaler Satzbereiche.
+    \item Inter-dokumentärer oder externer Kontext umfasst Informationen, die außerhalb des betrachteten Dokuments liegen – etwa frühere Texte, Hintergrundwissen oder externe Wissensquellen. Diese Art der Kontextualisierung ermöglicht es Modellen, Aussagen einzuordnen, Referenzen zu verstehen und Wissenslücken zu schließen.
+    \item Simultane Berücksichtigung von Struktur- und Sprecherwechseln ist besonders relevant bei dialogischen oder transkribierten Daten. Hier muss das Modell erkennen, wer spricht, wie Themen sich verändern und welche Referenzen zwischen Äußerungen bestehen. Der Ansatz der Context-Aware Hierarchical Attention for Abstractive Dialogue Summarization (Yang et al., 2025) zeigt, dass hierarchische Aufmerksamkeitsmechanismen die Modellleistung bei der Zusammenfassung von Dialogen und Transkripten signifikant verbessern.
+\end{itemize}
 
 \subsection{Rolling Summary}
 Die Rolling Summary – häufig auch als mehrstufige, hierarchische oder inkrementelle Summarisierung bezeichnet – beschreibt ein Verfahren zur fortlaufenden Verdichtung von Texten, die entweder sehr lang sind oder kontinuierlich anfallen. Im Gegensatz zu klassischen Summarisierungsansätzen, bei denen ein Text in seiner Gesamtheit verdichtet wird, basiert die Rolling Summary auf einer schrittweisen Informationsverarbeitung. Der Eingangstext wird zunächst in kleinere Abschnitte (Chunks) aufgeteilt, anschließend separat zusammengefasst und schließlich über mehrere Ebenen hinweg zu einer konsistenten Gesamtsummary aggregiert. Dieses Vorgehen folgt dem Prinzip „split–summarize–aggregate“ und ist besonders geeignet für Inhalte, die von Natur aus segmentiert oder zeitlich verteilt vorliegen – etwa Chatverläufe, Dokumentensammlungen oder Meeting-Transkripte.
@@ -144,6 +128,8 @@ Ein besonders relevanter Spezialfall der Rolling Summary ist die inkrementelle R
 Die Rolling Summary bietet eine Reihe von Vorteilen. Besonders hervorzuheben sind Skalierbarkeit und Speichereffizienz. Da nur kleine Teile des Textes gleichzeitig verarbeitet werden müssen und Zwischenzusammenfassungen kompakt bleiben, lässt sich das Verfahren auch bei sehr langen Dokumenten oder Echtzeitdaten anwenden. Zudem ermöglicht die mehrstufige Aggregation eine flexible Anpassung der Abstraktionstiefe: Informationsdichte und Detailgrad können auf jeder Stufe kontrolliert gesteuert werden.
 
 Gleichzeitig bringt die Methode auch Herausforderungen mit sich. Durch die wiederholte Verdichtung besteht ein Risiko, dass Informationen verloren gehen oder wichtige Details in frühen Stufen eliminiert werden. Ebenso kann es zu einer sogenannten Bias-Kaskade kommen: Fehler oder Gewichtungen auf tieferen Ebenen setzen sich nach oben fort und beeinflussen so die spätere Gesamtsummary. Darüber hinaus verlangt das Verfahren eine sorgfältige Balancierung zwischen Kompressionsstärke und Informationsgehalt. Wird jeder Chunk zu stark verdichtet, entsteht eine oberflächliche Gesamtsummary; wird zu wenig verdichtet, wächst die Summary übermäßig und verliert ihren Zweck. Auch die Wahl der Chunk-Größe spielt eine entscheidende Rolle: Kürzere Chunks erhöhen die Aktualität und eignen sich gut für Echtzeitanwendungen, enthalten jedoch weniger kontextuelle Information; längere Chunks erhöhen die Dichte der Informationen, gehen aber zulasten der Reaktionszeit.
+
+https://factory.ai/news/compressing-context
 
 
 \section{Prompt Engineering}
@@ -159,9 +145,5 @@ In der Praxis unterscheidet man verschiedene Arten von Prompts:
 Zu den gängigen Strategien zählen Zero-Shot Prompting, bei dem das Modell nur eine Aufgabenbeschreibung erhält, Few-Shot Prompting mit wenigen Beispielpaaren zur Orientierung, sowie Chain-of-Thought (CoT) Prompting, das das Modell zu einer schrittweisen Herleitung seiner Antwort anregt (Schulhoff et al., 2024).
 
 Die Qualität eines Prompts hängt wesentlich von Formulierung, Klarheit, Kontext und Beispielwahl ab – schon kleine Änderungen können zu deutlich unterschiedlichen Ergebnissen führen (Schulhoff et al., 2024). Zudem sind Prompts stark modellspezifisch: Ein erfolgreicher Prompt für Modell A liefert nicht zwingend gute Resultate bei Modell B. Die Bewertung guter Prompts bleibt schwierig, da es bislang keine standardisierten Metriken gibt und qualitative Urteile oft subjektiv ausfallen (Sahoo et al., 2024). Darüber hinaus gilt: Mehr Beispiele oder längere Kontexte führen nicht zwangsläufig zu besseren Ergebnissen; zu viele Informationen können den Output sogar verschlechtern (Overtransfer-Effekte).
-
-
-\section{Weitere Hilfsmittel und Tools}
-\subsection{RAG}
 
 

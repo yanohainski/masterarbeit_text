@@ -4,29 +4,66 @@ In diesem Kapitel wird die Umsetzung der geplanten Softwarearchitektur im Detail
 
 Im folgenden wird zunächst die Gesamtarchitektur betrachtet, wobei Besonderheiten der Implementierung sowie die Nutzung von Django hervorgehoben werden. Anschließend wird die eigens entwickelte Django App \textit{Voice} vorgestellt, in der die Geschäftslogik implementiert ist. Zuletzt wird auf den Aufbau des eigentlichen LLM-Agenten eingegangen.
 
-\section{Proof on Concept}
+\section{Nachweis der Machbarkeit (Proof of Concept)}
 Zeigen des ersten Prototypen welcher Mit jupyter Notebook entstanden ist
 Probleme die sich ergeben haben (Threading) 
+Als erstes wurde das Grundkonzept mit einem schnellen Jupyter Notebook in Python aufgebaut. Dazu mithilfe von Skripten Audiodateien erstellt, welche ins richtige Format gebracht wurden. 
+
+Um die allgemeine Machbarkeit des Projekts zu Prüfen wurde zuerst in einem Jupyter Notebook ein erstes Grundkonzept aufgebaut, welches den aus dem Masterprojekt bekannten Speech-to-Text Service mit einem LLM verbinden sollte. 
+
+
 
 \section{Backendstruktur}
+Das Backend von Notisent wurde mit Django ertellt. Django nutzt für die erstellung von Funktionen Apps, welche jeweils eine Aufgabe übernehmen. Für dieses Projekt wurde die Voice app innerhalb von Django erstellt, welche sämtliche funktionen des Meetingassistenten übernehmen wird. 
 Ganz kurz beschreiben wie Struktur wie Notisent backend aufgebaut ist. Daran anschließend erklären wie eigenes Projekt eingebunden wird
 
+Das Notisent Backend ist eine modulare Plattform, welche auf Django und dem Django Rest Framework (DRF) basiert. Es dient als Schnittstelle für die Verarbeitung von Daten, Integration 
+
+
+
+
+Utils.py = hilfsskripte 
+
+\section{Teams Bot}
+
+
 \section{Django voice-App}
+Nachrichten, welche von der Attendee API an den im Notisent Backend liegenden Webhook empfangen werden können verschiedenen Trigger haben, weshalb sie von der API versendet werden. Insgesamt gibt es sieben verschiedene Trigger, auf welche der Bot zugriff hat. 
+Für dieses Projekt sind die wichtigsten "bot.state-change", welcher den status des Bots mitteilt.
+(Ready, Joining, Joined - Not Recording, Joinend - Recording, Leaving, Post Processing, Fatal Error, Waiting Room, Ended) 
+
+Tabelle mit Status und was für informationen dort drin stehen.
+
+transcipt.update um Transkripte zu erhalten 
+participant-events.join-leave um weitere Teilnehmer zu erfassen. 
+
+Wichtigste Aufgabe ist das Handling der ankommenden Daten. Nachrichten von Attendee werden an einen Webhook im Backend gesendet. 
+In der Ersten Version werden die Nachrichten im View auf ihre Trigger gefiltert. Nachrichten mit dem transcript.update trigger werden in eine Warteschlage hinzugefügt, welche die Gesamtlänge der Nachrichten überwacht. Da es oftmals auch sehr kurze Transkripte gibt, etwa wenn von anderen Teilnehmern eine bestätigung in form eines Ok kommt, werden alle ankommenden transkripte auf ihre länge geprüft und anschließend in eine Warteschlage hinzugefügt. Übersteigt die Gesamtlänge aller Nachrichten einen bestimmten Schwellenwert, in der Ersten Version 10 Sekunden, so wird die gesamte Warteschlange zu einer Nachricht zusammengefasst und zur weiterverarbeitung ans llM geschickt. 
+Das ergebnis der Zusammenfassung des LLMs wird als "previous Summary" zwischengespeichert und bei der Nächsten verarbeitung der Warteschlage mit ins llm gegeben um eine koheränte zusammenfassung zu erstellen. 
+
+Anschließend werden die Chunks in der Datenbank gespeichert und über einen Webhook ans Frontend geschickt. Dabei wird immer nur die neuste Nachricht versendet, da diese durch den aufbau der Rolling Summary immer die aktuell vollständige zusammenfassung enthält. 
+
+In der voice App, soll die verarbeitung der Transkriptions-Chunks aus übernommen werden. Dazu wurde zuerst ein Webhook eingerichtet, welcher die von der Attendee API erhaltenen Informationen verarbeitet. 
+Ankommende Nachrichten werden je nach trigger unterschiedlich vearbeitet. 
+Nachrichten welche über die Transcript.Update message versendet werden, werden an eine Nachrichtenwarteschlange angehängt, nach einer festgelgten gesamtdauer aller nachrichten wird die gesamte queue ans llm geschickt. Mehr dazu im "Kapitel Verarbeitung des Live Transkripts"
+
+Das ergebnis des LLMs wird aktuell mithilfe eines Websockets an das Frontend geschickt. dazu wird eine verbindung mittels Websocket eingerichtet, welche die neusten ergebnisse des LLMs immer 
 Verschiedene Apps, Django 
 DsPy 
 Webhooks 
 Code wie der Prompt eingebunden ist
 
-\section{Teams Bot}
-Attendee API 
-Wie funktioniert, wie wurde eingesetzt
-Vorherige Probleme mit erstellen von Teams Bot über MS Graph API und Azure erwähnen
+LLM.py = Prompting der Analyse mit Dspy, prompt dort drin, alles was mit AI Call zu tun hat
+braodcast.py kümmert sich um websocket broadcasting der zusammenfassung an Frontend
+cache.py = Zwischenspeichern der Teilzusammenfassungen um 
 
-\section{Verarbeitung des Live-Transkripts}
+\section{Prompting Live-Transkripts}
 Prompt 
+Länge der Aufnahme anpassen. Was funktioniert besser 10 sekunden oder 5 Sekunden
 
 \section{Frontend Application}
 Weniger Fokus drauf, nur anzeige von Zusammengefassten Texten, TBC 
+
 
 \section{Optimierung}
 Doppeloptimierung, Sprachmodell zum erkennen 

@@ -1,84 +1,118 @@
 \chapter{Methodik}
 \section{Anforderungen an die Implementierung}
--> Anforderungen von Notisent 
--> Eigene Anforderungen
--> Anforderungen aus der Industrie 
-Herausforderungen und mögliche Probleme 
-Vollständiges Interviewtranskript im Anhang 
-
 Die Anforderungen an die Implementierung ergeben sich aus den Zielen, die Notisent verfolgt, den anfangs definierten Forschungsfragen sowie einem Interview mit jemandem aus der Industrie der sich für das Projekt begeistern konnte. Da es sich bei dieser Arbeit um die Entwicklung eines Prototypen für Produkt handelt, welcher später von vielen Kund:innen genutzt wird, ist eine einfache Nutzung essentiell. Darüber hinaus muss die Implementierung skalierbar und erweiterbar sein. 
 
 Die Anforderungen sind umfangreicher als sie in dieser Arbeit komplett umgesetzt werden können, weshalb zwischen Muss- und Kann-Anforderungen unterschieden wird. 
 Muss Anforderungen sind Anforderungen für ein minimal viable Produkt und setzen sich wie folgt zusammen: 
-Muss Anforderungen:
+
+Das System muss:
 \begin{itemize}
-    \item Das System muss die gesprochenn Inhalte Transkribieren 
-    \item Das System muss in der Lage sein, die Transkription zu analysieren
-    \item Das System muss mit Microsoft Teams kompatibel sein
-    \item Das System muss in Echtzeit arbeiten
+    \item die gesprochenn Inhalte Transkribieren 
+    \item kontinuierlich ein Meeting dokumentieren
+    \item die Transkription zu analysieren
+    \item mit Microsoft Teams kompatibel sein
+    \item in Echtzeit arbeiten
     \item Das System muss das Gespräch sinnvoll und ohne Informationsverlust zusammenfassen
     \item Das System muss die Informationen für alle Teilnehmer anzeigen.
 \end{itemize}
+
+Im Zuge der Bearbeitung dieser Masterarbeit konnte ich mich ausgiebig mit einem Manager bei Bosch Powertrain Solutions unterhalten, welcher sich für das Thema begeistern konnte. 
+Aus seinen schilderungen wie der aktuelle Workflow für die Dokumentation abläuft und wünschen konnten weitere Anforderungen an das system abgeleitet werden, welche konkreten nutzen in der Wirtschaft hätten. 
+
 Kann Anforderungen: 
-1. Sprechererkennung 
-2. Zugriff auf Datenbank für Kontext, mit Notisent Agent gemeinsam.
-3. Unterschiedliche Modi je nach Teilnehmer. Entwicklermodus für technischere Meetings oder Managermodus für weniger technische Inhalte
-4. 
+\begin{itemize}
+    \item Sprechererkennung
+    \item Zugriff auf Datenbank für Kontext, mit Notisent Agent gemeinsam. Hintergrundinformationen basierend auf Gesprächsinhalt darstellen.
+    \item Unterschiedliche Modi je nach Teilnehmer. "High Level Wrap up" und detailierte Expertendiskussion
+    \item Gemeinsame Reviewfunktion der Gesamtzusammenfassung im Anschluss des Meetings für alle Teilnehmer
+    \item Gemeinsames anpassen und Bearbeiten der Gesamtzusammenfassung für alle Teilnehmer
+    \item Die Referenzen zur Erstellung der Zusammenfassung aus den Meeting Minutes einsehbar. Anzeige bei Bedarf     
+\end{itemize}
+
 
 
 \section{Planung der Softwarearchitektur}
 Kurze Grafik, wie mit der Software interagiert wird. Ablaufdiagramm
+In diesem Kapitel soll beschrieben werden wie die Software in der Theorie geplant wurde. Was für komponenten wichtig und wie diese miteinander Interagieren. 
+Genauer beschrieben werden soll das ganze anschließend in Kapitel 04 Implementierung. Dort geht es um darum wie die Software umgesetzt wurde. 
+Wie Funktioniert das Gesamtkonzept. 
 
-\subsection{Interaktion}
-Die Interaktion zwischen dem Anwender und des Meetingassistenten bildet die Schnittstelle zur Außenwelt und ist essentiell wichtig für die Benutzerfreundlichkeit des Gesamtsystems. Geplant ist die Entwicklung eines Teams Plugins, welches in der Lage ist die Informationen anzuzeigen. 
-Mithilfe der Attendee API (Referenz) ist das System in der Lage Audioinhalte aus einem Teams Meeting heraus zu streamen und zur weiteren verarbeitung an ein Backend zu streamen.
-größtes Problem bei der Recherche, war es zugriff auf MS Teams zu bekommen. Erstellen von Bots möglich, allerdings werden bestimmte zugriffe zurückgehalten. Z.b. Live Audio, daher gibt es nur nur eine zusammenfassung nachträglich von Teams.
+Planung der Software, Umsetzung in Kapitel 4 Implementierung
+Projekt wird in unterteile definiert, welche in Abbilung X (Highlevel Overview software veranschaulicht worden) Aufgegriffen und beschrieben. 
 
-Attendee arbeitet mit Broswerautomatisierung, sodass das Meeting im browser geöffnet wird über die Teams browser variante und darüber dann daten abgegriffen.
+Hier soll auch gezeigt werden welche schritte zur Umsetzung geplant waren.
+Hauptkomponenten des Systems: Grafische Bedienoberfläche zum Starten des Assistenten, sowie anzeige der Zusammenfassung 
 
-\subsection{Transkription}
-Die Transkription der Audioinhalte geschieht mit eines aus dem Masterprojekt bekannten Transkriptionservices welcher selbst mit einem Docker Container gehostet wird und auf Whisper basiert. 
-Als alternative kann auch ein Transcriptionservice der Attendee API verwendet werden. Diese ist in der Lage die Teams eigenen Closed Caption Transcription zu verwenden. 
+
+
+\subsection{Interaktion, Frontend}
+Die Interaktion zwischen Anwender und Meetingassistent bildet die zentrale Schnittstelle zur Außenwelt und ist damit entscheidend für die Benutzerfreundlichkeit des gesamten Systems. Ohne eine klare, leicht verständliche Oberfläche verliert selbst die beste Analyse im Hintergrund ihren Nutzen. Geplant ist daher die Entwicklung eines Microsoft-Teams-Plugins, das relevante Informationen strukturiert darstellt. Auf Details zur konkreten Darstellung wird später eingegangen. Zunächst soll die grafische Oberfläche dem Nutzer vor allem ermöglichen, den Assistenten gezielt zu starten und dessen Ergebnisse einzusehen.
+
+Technisch basiert der Ansatz auf der Nutzung der Attendee API, mit deren Hilfe Audioinhalte aus einem Teams-Meeting extrahiert und an ein Backend zur Weiterverarbeitung gestreamt werden können. Genau hier zeigte sich jedoch eines der größten Probleme während der Recherche: Der Zugriff auf Microsoft Teams ist stark reglementiert. Zwar ist das Erstellen von Bots grundsätzlich möglich, allerdings werden kritische Funktionen wie der Zugriff auf Live-Audio bewusst eingeschränkt. In der Praxis bedeutet das, dass eine Echtzeitverarbeitung des Gesprächsaudios nicht vorgesehen ist und lediglich nachträgliche Zusammenfassungen durch Teams selbst bereitgestellt werden. Das setzt klare Grenzen, mit denen offen umgegangen werden muss.
+
+Aus diesem Grund wird die Darstellung der Ergebnisse im ersten Schritt bewusst einfach gehalten. Für den Umfang dieser Arbeit genügt eine schlanke Webanwendung, die zunächst ausschließlich eine Zusammenfassung des Gesprochenen anzeigt. Diese reduzierte Lösung ist kein Nachteil, sondern eine bewusste Entscheidung: Sie schafft eine stabile Grundlage, auf der später weitere Funktionen direkt im Teams-Plugin ergänzt werden können.
+
+Grundsätzlich existieren mehrere Möglichkeiten, mit Microsoft Teams zu interagieren. Dazu zählen Teams-Bots, Teams-Add-ins zur Einbindung externer Webseiten – vergleichbar mit Outlook-Add-ins – sowie sogenannte Teams-Registerkarten (Tabs), die Inhalte direkt innerhalb der Teams-Oberfläche anzeigen. Vor diesem Hintergrund ist geplant, ein Teams-Addon zu entwickeln und dieses mit einer externen API zu kombinieren. So lässt sich die eingeschränkte Funktionalität von Teams sinnvoll erweitern, ohne die technischen oder sicherheitsrelevanten Grenzen der Plattform zu ignorieren.
+
+\subsection{Zugriff auf Meetingdaten}
+Verwendung von Attendee als API um auf Teams Meetingdaten zuzugreifen. Attendee funktioniert über Browserautomatisierung, dabei wird das Meeting über die Meeting URL in einem Headless Browser geöffnet.  (Browser ohne UI) 
+Browserautomation kurz erklären 
+Über Browserautomatisierung (Playwright) nimmt der Bot nun am Meeting teil, dabei wird ein weiterer User simuliert. Dadurch kompabilität mit Teams USer interface. 
+WAs kann der Bot alles machen? 
+Recording, Transcription, Speech, Avatars und Chat. Transcription mit Deepgram API Key möglich. Verchiedene Einstellungsmöglichkeiten 
+
+Transcriptionservice von Attendee, allerdings anbinudng an externen Service wie Deepgram. Weiterhin auch die Auf eigenen Lösung zurückgreifen aus der Masterarbeit.  
+
+Um Zugriff auf die Audiodateien innerhalb eines Teams Meetings zu erhalten wurde Attendee verwendet. 
+Attendee API 
+Wie funktioniert, wie wurde eingesetzt
+Vorherige Probleme mit erstellen von Teams Bot über MS Graph API und Azure erwähnen
+Um zugriff auf 
+
+Attendee ist eine entwicklerorientierte, quelloffene Plattform zur automatisierten Teilnahme an Videokonferenzen sowie zur Erfassung und Weiterverarbeitung von Meeting-Daten. Das Tool stellt eine einheitliche Programmierschnittstelle bereit, über die sogenannte Meeting-Bots in gängigen Videokonferenzsystemen wie Zoom, Google Meet und Microsoft Teams gesteuert werden können. Ziel von Attendee ist es, die plattformspezifische Komplexität dieser Systeme zu abstrahieren und eine standardisierte Anbindung für Forschung und Entwicklung zu ermöglichen.
+
+Die technische Umsetzung von Attendee basiert unter anderem auf Browser-Automatisierung. Dabei wird ein realer Webbrowser programmgesteuert verwendet, um Videokonferenzen über die offiziellen Web-Clients der jeweiligen Plattformen zu betreten. Der Bot verhält sich somit funktional wie ein regulärer menschlicher Teilnehmer, einschließlich Authentifizierung, Beitritt zum Meeting, Medienverarbeitung und Interaktion mit der Benutzeroberfläche. Dieser Ansatz erlaubt es, ohne tiefe oder proprietäre Integrationen in die jeweiligen Plattform-APIs auszukommen, die häufig eingeschränkt, instabil oder nicht öffentlich dokumentiert sind.
+
+Durch die Nutzung der Browser-Automatisierung kann Attendee Audio- und Videostreams direkt aus dem Meeting erfassen und für weitere Verarbeitungsschritte, wie beispielsweise die automatische Transkription oder Analyse, bereitstellen. Gleichzeitig bringt dieser Ansatz technische Herausforderungen mit sich, da Änderungen an den Web-Oberflächen der Konferenzplattformen die Stabilität der Automatisierung beeinflussen können. Attendee adressiert diese Problematik durch eine modulare Architektur und regelmäßige Anpassungen an die unterstützten Plattformen.
+
+In dieser Arbeit wurde Attendee eingesetzt, um Videokonferenzen automatisiert aufzuzeichnen und Sprachdaten für die nachgelagerte Analyse bereitzustellen. Die Kombination aus API-basierter Steuerung und browserbasierter Automatisierung ermöglichte eine reproduzierbare und skalierbare Datenerhebung, ohne eine eigene Implementierung plattformspezifischer Konferenzschnittstellen vornehmen zu müssen.
+
 
 \subsection{Backendfunktionen}
+Was ist Django? 
+Die Backendfunktionen sollen vom bestehenden Notisent Backend übernommen werden und durch zusätzliche funktionen erweitert werden. Das gesamte Backend von Notisent wurde in Pythons Webframework Django entwickelt. 
+
 Backend handelt files, Umwandlung in richtigen Datentyp, und leitet die daten weiter an die richtige stelle. 
-Aufbau des Notisent Backends kurz erläutern, da in die Struktur eingebaut wird. 
+Aufbau des Notisent Backends kurz erläutern, da in die Struktur eingebaut wird. Wird näher in Kapitel 4 Implementierung drauf eingegangen. Hier nur Ganz grundsätzlich. Welche funktionen hat das Backend noch? API Zugriff auf AI Modelle KISSKI, Authentifizierung und Datenbank 
 Beim Backend wird die vorhandene Backendstruktur von Nostisent genutzt und um eine eigene App erweitert. Das Backend von Notisent wurde mit Django gebaut.
+Backend nimmt Audio entgegen von Meeting, wandelt in richtiges Datenformat(WAV) darüber hinaus kümmert er sich um Chunking der gestreamten Daten und  sendet es an den Transcription container. HTTP Verbindnng. 
+Nimmt Transkribierten TExt entgegen und sendet ihn über API an KI Schnittstelle wo Modelle gehostet werden. 
+Sicherheitsfunktionen
+Tasks mit Worker Celery, dadurch asynchrone verarbeitung möglich. 
 
 \subsection{Analyse des Transkripts}
 KI-Modelle auf Kisski Gehosted, wird über eine API zugegriffen. 
-Stellt verschiedene Modelle bereit. Prompts sollen 
+Stellt verschiedene Modelle bereit. Prompts sollen mithilfe von DSPY aufbereitet werden. 5 Sekunden transkribiertes Audio wird in Textform mit entsprechendem Prompt an 
 
-\subsection{Darstellung der Ergebnisse}
-Darstellung der ergebnisse vorherst sehr einfach halten. Soll allerdings später im Tool mit angezeigt werden. 
-Für diese Arbeit reicht eine einfache Web anwendung, welche 
+Für den Einsatz einer KI ist diese geplant, dadurch werden diese Features ermöglicht. 
 
+DSPy (Declarytive Self-improving Python) ist ein deklaratives framework zum bauen modularer KI Software. Higher level language for AI programming 
+Für jede Ki Kmoponente im System wird ein Input/Output verhalten als Signature. 
 
+DSPy (Declarative Self-improving Python) ist ein Framework, das den Einsatz großer Sprachmodelle systematischer und verlässlicher gestaltet. Statt Prompts manuell zu optimieren, strukturiert DSPy LLM-Interaktionen in klar definierte Module – etwa für Retrieval, schrittweises Reasoning oder Antwortgenerierung. Diese Module beschreiben die Aufgabenlogik, während DSPy automatisch optimiert, wie das Modell diese Aufgaben am effektivsten ausführt.
 
+Die Optimierung erfolgt ohne klassisches Finetuning, sondern über Compiler- und Suchverfahren, die passende Beispiele, Zwischenschritte und Promptstrukturen erzeugen. Dadurch werden LLM-Pipelines stabiler, reproduzierbarer und weniger anfällig für Variabilität in der Modellausgabe. Besonders bei komplexen Systemen wie RAG-Architekturen oder mehrstufigen Analyseprozessen bietet DSPy deutliche Vorteile, da es robuste Ergebnisse fördert und den Entwicklungsaufwand reduziert.
 
-
--Eigener Transcription Service mit Faster Whisper im Docker Container (Masterprojekt) 
--> Attendee bietet auch eigene Transcription über closed caption an, testen ob diese Besser funktioniert als eigener Service. 
--Notisent Django Backend zur Verarbeitung 
--Attendee API um auf Teams Meeting zuzugreifen 
-
-Interaktion Nutzer <-> System
-
-KISSKI Hostet API auf dem LLMs laufen 
-
-\section{Implementierungsschritte}
-Wird vorgegangen um 
-
-Geplante schritte zur Umsetzung des Projekts
-Woraus setzt sich das Projekt zusammmen, Wie wird die Architektur aus kapitel davor umgesetzt. Auf was für bestehende teile wird zugegriffen? Masterprojekt sowie Notisent
-Proof of Concept bevor richtig bearbeitet werden soll, informationen daraus ziehen und für weiteres vorgehen 
+DSPy ermöglicht somit eine klare Trennung zwischen Aufgabenbeschreibung und Modellsteuerung und trägt dazu bei, LLM-basierte Anwendungen transparenter, besser wartbar und methodisch fundierter umzusetzen.
+DSPY: COMPILING DECLARATIVE LANGUAGE
+MODEL CALLS INTO SELF-IMPROVING PIPELINES and github seiten von DSPY
 
 \section{Auswahl des LLM}
 Bei der Auswahl des LLMs 
 Vergleich verschiedener Modelle, vor und nachteile. Auswahl basierend auf papern und eigenen versuchen 
 Für das Projekt wird GPT-OSS verwendet, ist das von Notisent aktuell verwendete Modell für Ihre KI aufgaben. 
 Kurzbeschreibung was das kann und wie es in Benchmarks abschneidet. 
-Weitere Modelle erwähnen, 
+Weitere Modelle erwähnen, GPT-OSS ist Decoder Only Modell von OpenAi, open weight von notisent gewähltes modell. 
 
 
 
@@ -89,8 +123,8 @@ Schwierigkeit das zu evaluieren, subjektiv wie etwas zusammengefasst wird. Nach 
 Zur Bewertung der Live Zusammenfassung lassen sich verschiedene Metriken zu rate ziehen. Dazu wird einmal das Gesamttranskript nach ende des Meetings über die Teams Funktion zusammengefasst und anschließend mit der Live erstellen Zusammenfassung verglichen:
 
 \begin{itemize}
-    \item ROUGE(1,2,L): misst Überlappungen von Wörtern oder Phrasen zwischen Referenzzusammenfassung und Modelloutput
-    \item BERTScore: Vergleicht nicht Wörter, sondern deren semantische Einbettung
+    \item ROUGE(1,2,L): misst Überlappungen von Wörtern oder Phrasen zwischen Referenzzusammenfassung und Modelloutput (Klassische Metrik)
+    \item BERTScore: Vergleicht nicht Wörter, sondern deren semantische Einbettung (Semantische Metrik)
 \end{itemize}
 
 Darüber hinaus lassen sich auch mit LLM-basierten Metriken die Qualität der Zusammenfassung bewerten
