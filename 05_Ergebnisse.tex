@@ -4,3 +4,72 @@ Die Tests werden wie geplant im Frontend durchgeführt. Dafür werden die Prompt
 Die Tests werden dann wie folgt durchgeführt:
 
 \section{Analyse}
+
+\section{Optimierungsmöglichkeiten}
+Doppeloptimierung, Sprachmodell zum erkennen 
+Problem der Zugänglichkeit zu MS Team liveaudio
+Anpassen der Darstellung von 
+zero shot prompting 
+frew shot prompting 
+wie kann das ergebnis des assistenten optimiert werden
+evtl voranalyse? SpaCy
+Performance-optimierung, latenzreduktion, asynchronität, filterstrategien, skalierbarkeit 
+
+In diesem Kapitel werden mögliche Optimierungsansätze für den entwickelten Meeting-Assistenten diskutiert. Der Fokus liegt dabei nicht auf bereits implementierten Maßnahmen, sondern auf theoretisch sinnvollen Verbesserungsmöglichkeiten, die sich aus dem aktuellen Stand der Forschung sowie aus den technischen Rahmenbedingungen des Systems ergeben. 
+
+Da die automatische Spracherkennung durch Microsoft Teams vorgegeben ist und nicht beeinflusst werden kann, beziehen sich alle Optimierungsansätze ausschließlich auf die Weiterverarbeitung der erzeugten Transkripte, die Interaktionen mit dem LLM sowie auf architektonische Aspekte des Systems. Dadurch ergeben sich folgende Rahmenbedingungen: 
+\begin{itemize}
+    \item Die Qualität der Transkripte ist aktuell nicht steuerbar 
+    \item Fehlerhafte oder unvollständige Erkennung müssen nachträglich behandelt werden.
+    \item Optimierungen können ausschließlich auf Textbasis erfolgen. 
+    \item Die Verarbeitung erfolgt zeitnah, jedoch nicht in strikter Echtzeit
+\end{itemize}
+Dadurch wird klar, dass die Optimierung vor allem auf der semantsichen und strukturellen Ebene ansetzen muss. 
+
+Ein wesentlicher Ansatzpunkt zur Verbesserung der Ergebnisqualität liegt in der Aufbereitung der Transkripte vor der Übergabe an das Sprachmodell, mögliche Maßnahmen umfassen: 
+\begin{itemize}
+    \item Segmentierung der Transkripte in inhaltlich zusammenhängende Abschnitte
+    \item Entfernung redundanter Inhalte, etwa Wiederholungen oder Füllwörter
+    \item Normalisierung der Sprache z.B. Vereinheitlichung von Satzfragmenten
+    \item Markierung von Sprecherwechseln oder Themenübergängen
+\end{itemize}
+Eine solche Vorverarbeitung kann dazu beitragen, die Komplexität der Eingabe zu reduzieren und dem Sprachmodell klarere semantische Strukturen bereitzustellen. Dies ist insbesondere bei längeren Meetings relevant, in denen thematsiche Sprünge und Wiederholungen häufig auftreten. 
+
+\subsection{Prompt-Gestaltung}
+ein Besonders großer Einfluss auf die Qualität der Ergebnisse ergibt sich aus der Gestaltung der Prompts. Da das Sprachmodell maßgeblich durch den Kontext gesteuert wird, stellt das Prompt-Design einen zentralen Hebel dar. 
+
+Zero-Shot-Prompting:
+Beim Zero-Shot-ansatz erhält das Modell lediglich eine Aufgabenbeschreibung. Dieser Ansatz ist leichtgewichtig und effizient, birgt jedoch Risiken wie z.B. 
+\begin{itemize}
+    \item uneinheitliche Struktur der Ausgabe
+    \item unklare Gewichtung einzelner Inhalte
+    \item stärkere Abhängigkeit vom jeweiligen Kontext
+\end{itemize}
+
+Few-Shot-Prompting:
+Durch das Ergänzen weniger Beispielausgaben kann das Modell stärker gelenkt werden. Mögliche Vorteile sind: 
+\begin{itemize}
+    \item konsistentere Formatierung
+    \item bessere Identifikation von Entscheidungen und Aufgaben
+    \item höhere Vergleichbarkeit zwischen einzelnen Zusammenfassungen
+\end{itemize}
+Dem steht ein erhöhter Tokenverbrauch gegenüber, der sich sowhl auf die Latenz als auch auf die Kosten auswirkt. Theoretisch bietet sich daher ein hybrider Ansatz an, bei dem Few-Shot-Prompts nur für ausgewählte Verarbeitungsschritte eingesetzt werden. 
+
+\subsection{Voranalyse mit klassischen NLP-Verfahren}
+Eine weitere Möglichkeit der Optimierung besteht in der vorgeschalteten Analyse der Transkripte mittels klassischer NLP-Methoden. Ziel ist es, dem Sprachmodell nicht ausschließlich Rohtext, sondern bereits strukturierte Informationen bereitzustellen. 
+
+Mögliche Verfahren sind unter anderem: 
+\begin{itemize}
+    \item Satz- und Abschnittssegmentierung
+    \item Erkennung von Schlüsselbegriffen und Themen
+    \item Identifikation von Personen, Projekten oder Entscheidungen
+    \item Klassifikation von Gesprächsanteilen (Diskussion, Entscheidung, Aufgabe)
+\end{itemize}
+
+Werkzeuge wie spaCy eignen sich für solche Aufgaben, da sie effizient arbeiten und sich gut in bestehende Pipelines integrieren lassen. Eine solche Vorverarbeitung könnte insbesondere die Extraktion von Aktionspunkten udn Beschlüssen verbessern. 
+
+Neben der inhaltlichen Qualität spielt die Systemleistung ebenfalls eine zentrale Rolle, insbesondere bei einem Einsatz während laufender Meetings. 
+Durch effektive Filterstrategien lassen sich irrelevante Inhalte wie Smalltalk oder Wiederholungen herausfiltern und somit die Belastung des LLM reduzieren, was sich positiv auf die Laufzeit auswirkt. 
+
+Die gezeigten Opimierungsansätze zeigen, dass trotz der aktuell noch festen Vorgabe durch die Spracherkennung Verbesserungspotential besteht. Die beschriebenen Ansätze bilden eine konzeptionelle Grundlage für zukünftige Erweiterungen und können in weiterführenden Arbeiten praktisch evaluiert und miteinander verglichen werden. 
+

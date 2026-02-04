@@ -1,0 +1,174 @@
+Einleitung: 
+Grundlagen zum verständnis 
+Methodik bezieht sich auf Planung des Projekts
+Implementierung = umsetzung des Geplanten und programmierung, beispiel mit proof of concept
+
+Hilfsskripte im Anhang zu finden. "sendfireandforget", "sendaudio" usw 
+
+Grundlagen: 
+https://factory.ai/news/compressing-context
+
+Die Transformer-Architektur wurde 2017 von Vaswani et al. vorgestellt und markiert einen wesentlichen Fortschritt in der Entwicklung neuronaler Netze sowie in der natürlichen Sprachverarbeitung. Ihr zentraler Innovationspunkt liegt im vollständigen Verzicht auf rekurrente und konvolutionale Mechanismen zugunsten eines Selbstaufmerksamkeitsverfahrens (Self-Attention). Dieser Ansatz ermöglicht es, Abhängigkeiten zwischen weit auseinanderliegenden Token effizient zu modellieren und gleichzeitig eine hohe Parallelisierbarkeit der Berechnungen zu gewährleisten. Dadurch übertreffen Transformer-Modelle klassische Ansätze wie rekurrente neuronale Netze (RNNs) oder Convolutional Neural Networks (CNNs) im Hinblick auf Kontextverständnis, Rechenparallelität und Skalierbarkeit. Zudem erweist sich die Architektur als vielseitig einsetzbar und bildet heute die Grundlage nahezu aller großen Sprachmodelle wie BERT, GPT oder T5.
+
+Der ursprüngliche Transformer besteht aus einem Encoder- und einem Decoder-Stack. Der Encoder verarbeitet die Eingabesequenz und erzeugt kontextualisierte Repräsentationen, die anschließend im Decoder genutzt werden, um Ausgabesequenzen wie Übersetzungen oder Vorhersagen zu generieren. Diese klare funktionale Trennung hat zur Entwicklung spezialisierter Modellvarianten geführt. So kommen Encoder-only-Modelle (z. B. BERT) vor allem in Aufgaben der Sprachrepräsentation und Klassifikation zum Einsatz, während Decoder-only-Modelle (z. B. GPT) für autoregressive Textgenerierung optimiert sind. Encoder–Decoder-Modelle (z. B. T5) wiederum eignen sich besonders für Sequenz-zu-Sequenz-Aufgaben. Verweis auf Abbildungen
+
+Ein Transformer-Modell setzt sich im Wesentlichen aus vier Komponenten zusammen: dem Input Embedding, dem Positional Encodings, dem Selbstaufmerksamkeitsmechanismus sowie einem Feed-Forward-Netzwerk. Im ersten Schritt wird die Eingabesequenz durch den Tokenizer in Token zerlegt, die beispielsweise Wörter, Subwörter, Satzzeichen oder spezielle Steuersymbole repräsentieren können. Das anschließende Input Embedding überführt jedes dieser Token in einen Vektor fester Länge. Die Dimensionalität dieser Vektoren wird durch die Modellgröße vorgegeben und bildet die Grundlage für alle weiteren Berechnungen im Netzwerk. In modernen Transformer-Modellen haben Vektoren ein paar hundert bis einige tausend Dimensionen. Durch diese hohe Dimensionalität lässt sich die sprachliche Bedeutung eines Tokens nicht nur symbolisch, sondern auch geometrisch abbilden. Token stellt dabei einen Punkt in einem hochdimensionalen Vektorraum dar, in dem Ähnliche Tokens nahe beinander liegen, wähend inhaltlich unterschiedliche Tokens weiter entfernt liegen. 
+
+Ein zentrales Element der Architektur ist der Selbstaufmerksamkeitsmechanismus. Er ermöglicht es dem Modell, die Relevanz jedes Tokens im Kontext der gesamten Sequenz einzuschätzen und dadurch sowohl lokale als auch weitreichende Abhängigkeiten präzise abzubilden. Da alle Tokens gleichzeitig verarbeitet werden, entfallen die sequentiellen Engpässe klassischer RNN- oder LSTM-Modelle. Dies führt nicht nur zu einer erheblichen Steigerung der Effizienz, sondern verbessert auch die Qualität der generierten Repräsentationen und Ausgaben.
+
+Da ein Transformer keine inhärente Information über die Reihenfolge der Token besitzt, werden Positionsinformationen über sogenannte Positional Encodings ergänzt. Diese werden zu den Embeddings addiert und ermöglichen es dem Modell, sowohl absolute als auch relative Positionen innerhalb der Sequenz zu berücksichtigen. Die resultierende Sequenz aus Vektorrepräsentationen bildet den Eingang in die folgende Verarbeitungsschicht.
+
+Der Decoder – bzw. analog der Encoder – nutzt daraufhin den Selbstaufmerksamkeitsmechanismus, um die Beziehungen zwischen den Token innerhalb der Sequenz zu modellieren. In der Masked Multi-Head Attention, wie sie im Decoder eingesetzt wird, wird für jedes Token berechnet, welchen Einfluss die übrigen Token auf dessen Repräsentation haben. Die Berechnung erfolgt dabei parallel in mehreren „Attention-Heads“, die jeweils eigene Gewichtungsmatrizen verwenden. Dadurch kann das Modell verschiedene Arten von Abhängigkeiten gleichzeitig erfassen, etwa syntaktische Strukturen oder semantische Beziehungen.
+
+Im Anschluss an die Aufmerksamkeitsschicht werden die resultierenden Vektoren zu einer konsolidierten Repräsentation zusammengeführt und an ein positionsweise arbeitendes Feed-Forward-Netzwerk übergeben. Dieses Netzwerk wird unabhängig und identisch auf jeden Token angewendet und besteht typischerweise aus zwei linearen Transformationen mit einer dazwischenliegenden Akitiverungsfunktion, etwa RELU oder GELU. Durch die erste Transformation wird die Dimensionalität  der Token-Repräsentation erhöht, wodurh komplexere Kombinationen an Informationen gebildet werden können. Durch die nichtlinearen Aktivierungsfunktionen werden je nach Kontext bestimmte Neuronen angesprochen und andere ignoriert.
+Das Feed-Forward-Netzwerk erweitert die Modellkapazität erheblich, da es die Komplexität erhöht, mit der Muster aus den Daten gelernt werden können, und trägt maßgeblich zur Ausdrucksstärke der gesamten Architektur bei.
+
+Nachdem alle Schichten des Transformers durchlaufen wurden, gelangt die resultierende Repräsentation in ein abschließendes lineares Ausgabelayer. Dieses Layer projiziert den internen Zustandsvektor auf den gesamten Modellwortschatz und berechnet für jedes bekannte Token die Wahrscheinlichkeit, als nächstes generiert zu werden. Die Anzahl der Ausgabeknoten entspricht somit der Größe des Vokabulars.
+
+Mittels einer Softmax-Funktion werden die berechneten Werte in eine normalisierte Wahrscheinlichkeitsverteilung über alle möglichen Folgetoken umgewandelt. Bei der anschließenden Tokenauswahl wird häufig eine stochastische Sampling-Strategie verwendet und nicht zwingend das wahrscheinlichste Token gewählt. Diese Sampling-Strategie wird üblicherweise über einen Temperature Parameter gesteuert, welcher die Verteilung gezielt abschwächt oder schärft. Niedrige Temperaturewerte fürhren zu deterministischem Verhalten, bei dem hochwahrscheinliche Token bevorzugt werden, während höhere Temperaturewerte auch weniger wahrscheinliche Tokens eine realistsiche Auswahlchance geben. Dadurch lassen sich Modelle auf kontrollierte, reproduzierbare Ausgaben oder kreative variantenreiche Textgenerierung anpassen.
+
+Das neu generierte Token wird anschließend an die bisherige Sequenz angehängt und erneut in das Modell eingespeist. Dieser autoregressive Prozess wird so lange wiederholt, bis entweder eine vorgegebene maximale Sequenzlänge erreicht ist oder ein spezielles Stop-Token generiert wird.
+
+Neben der Textverarbeitung finden Transformer zunehmend Anwendung in weiteren Bereichen. In der Bildverarbeitung ersetzen Vision Transformer (ViT) klassische Convolutional Neural Networks, indem sie Bildpatches analog zu Tokensequenzen verarbeiten. In der Audioverarbeitung werden Transformer zur automatischen Spracherkennung, zur Klangklassifikation oder zur Sprachsynthese eingesetzt. Ein prominentes Beispiel ist Whisper, ein Transformer-basiertes Modell zur automatischen Spracherkennung (ASR). Obwohl Whispers Architektur ursprünglich aus der NLP-Forschung stammt, demonstriert es eindrucksvoll, dass Transformer universell auf zeitvariante Signale angewendet werden können.
+
+STT
+Die Entwicklung der Spracherkennung begann in den 1950er-Jahren mit regelbasierten Ansätzen zur Erkennung isolierter Wörter. Mit dem Aufkommen probabilistischer Verfahren, insbesondere Hidden Markov Models (HMM), etablierte sich ab den 1970er-Jahren ein Standardansatz zur Modellierung zeitlicher Abhängigkeiten in Sprachsignalen (Rabiner, 1989). Ab etwa 2010 führte der Einsatz von Deep Learning und End-to-End-Modellen, insbesondere CTC-basierten und später Transformer-basierten Architekturen, zu erheblichen Leistungssteigerungen (Hinton et al., 2012; Graves et al., 2006). Seit der Veröffentlichung großer multilingualer Foundation-Modelle wie wav2vec 2.0 (Baevski et al., 2020) oder Whisper (Radford et al., 2022) dominieren zunehmend generalisierbare, robust trainierte Systeme das Feld.
+
+Moderne STT-Systeme basieren überwiegend auf Deep-Learning-Architekturen, die akustische Merkmalsrepräsentationen, in Form von Log-Mel Spektrogrammen verarbeiten. Das Log-Mel Spektrogramm stellt dar, wie sich Frequenzen über Zeit verändern. Das Audiosignal wird Kurzzeit-Fourier-Transformation in den Frequenzbereich überführt. 
+Bei der Verarbeitung von Audioinhalten lassen sich zwei grundlegende Schritte unterscheiden:
+
+Ein aktueller Vertreter moderner STT-Systeme ist Whisper, das 2022 von OpenAI veröffentlicht wurde (Radford et al., 2022). Whisper ist ein Encoder-Decoder-Transformer, dessen Architektur ursprünglich aus der maschinellen Übersetzung stammt, jedoch für Audio- statt Texteingaben angepasst wurde. Der \textbf{Encoder} übernimmt die akustische Repräsentation und verarbeitet 30-Sekunden-Chunks eines Log-Mel-Spektrogramms. Über mehrere Transformer-Schichten mit Self-Attention werden zeitliche Abhängigkeiten im Audiosignal modelliert und akustische Merkmale wie Phoneme und Übergänge schrittweise zu einer kontextsensitiven, latenten Repräsentation verdichtet, die als Grundlage für die nachfolgende Dekodierung dient.  
+
+Der \textbf{Decoder} generiert auf Grundlage der Encoder-Repräsentation (Cross-Attention) sowie den bereits generierten Textkontext (Self-Attention) sukzessive Text-Tokens. Dabei entscheidet er bei jedem Generierungsschritt probabilistisch über das nächste Token und richtet seine Aufmerksamkeit gezielt auf relevante abschnitte der akustsichen Encoder-Ausgabe.Die Arbeitsweise ähnelt dabei einem Sprachmodell wie es bereits im Kapitel \textit{Transformer}, wobei der Decoder zusätzlich akustische Kontextinformationen berücksichtigt.
+
+Whisper wurde auf rund 680.000 Stunden multilingualer, teils schwach annotierter Audiodaten trainiert, eine Größenordnung, die im Bereich der ASR außergewöhnlich hoch ist (Radford et al., 2022). Die Trainingsdaten umfassen unter anderem Web-Audio, Podcasts, Vorträge, Interviews und Videos mit automatisch oder nur teilweise verlässlichen Transkripten. Durch diese heterogene Datensammlung zeichnet sich das Modell durch hohe Robustheit gegenüber Akzenten, verschiedenen Aufnahmebedingungen und Hintergrundgeräuschen aus. Etwa ein drittel der Trainingsdaten lag dabei auf Englisch vor, während kleinere Sprachen mit nur sehr wenig Trainingsmaterial trainiert worden sind. Dadurch unterscheidet sich die Performance deutlich, je nach Transkribierter Sprache. 
+
+Das Modell wird in verschiedenen Parametergrößen von tiny bis large bereitgestellt, was unterschiedliche Anforderungen hinsichtlich Genauigkeit und Rechenaufwand ermöglicht. Die Modellgröße bezieht sich dabei auf die Anzahl trainierbarer Parameter sowie die Tiefe und Breite der Transformerarchitektur. Die größte Variante erreicht in vielen Sprachen nahezu menschliche Genauigkeiten in der Transkription, allerdings auf Kosten der Inferenzgeschwindigkeit
+
+Da Whisper ein Foundation-Modell ist, lässt es sich durch Finetuning an spezifische Anwendungsfälle anpassen. Beim Finetuning wird das vortrainierte Modell auf eine kleinere, domänenspezifische Datenbasis weitertrainiert, um Besonderheiten eines Fachbereichs, einer Sprache, eines Dialekts oder einer spezifischen Akustik zu berücksichtigen (Prabhavalkar et al., 2023).
+
+Im Rahmen des Masterprojekts (Verweis auf eigenen Projektrahmen) wurde Whisper – bzw. eine optimierte Implementierung wie Faster-Whisper – auf einem spezifischen Datensatz weitertrainiert. Dieser Prozess umfasst typischerweise:
+
+LLM
+Large Language Models (LLMs) sind tiefenlernende neuronale Netze, die auf umfangreichen Sammlungen natürlicher Sprachdaten trainiert werden, um sowohl sprachliches Verständnis als auch generative Fähigkeiten zu entwickeln. Im Gegensatz zu älteren, stärker auf spezifische Aufgaben zugeschnittenen NLP-Modellen entstehen durch das Training auf breit gefächerten Textkorpora allgemeine, domänenübergreifende Sprachfertigkeiten. Daher werden moderne LLMs häufig als Foundation Models bezeichnet, da sie eine vielseitige Grundlage für eine Vielzahl nachgelagerter Anwendungen bieten (Zhao et al., 2023; Minaee et al., 2024).
+
+Technologisch basieren die meisten heutigen LLMs auf der Transformer-Architektur, die durch Mechanismen wie Self-Attention eine effiziente Verarbeitung langer Textsequenzen ermöglicht und damit die zuvor gängigen rekurrenten Modelle weitgehend abgelöst hat. Ein charakteristisches Merkmal von LLMs ist ihre enorme Größe: Sie umfassen häufig Milliarden von Parametern und werden auf Datensätzen im Größenbereich vieler hundert Gigabyte bis hin zu mehreren Terabyte trainiert. Empirische Scaling Laws zeigen, dass mit wachsenden Modellparametern, größeren Datensätzen und höherer Rechenleistung systematisch Leistungssteigerungen erzielt werden können (Zhao et al., 2023).
+
+Der Trainingsprozess moderner LLMs erfolgt in zwei Schritten. Zunächst werden die Modelle im Pre-Training mittels selbstüberwachtem Lernen trainiert. Typische Lernziele sind das Vorhersagen des nächsten Tokens oder das Auffüllen maskierter Textteile. Dieser Prozess führt zu einer breit angelegten, generalistischen Sprachkompetenz. Darauf aufbauend folgt das Fine-Tuning, bei dem ein vortrainiertes Modell durch überwachtes Lernen auf spezifische Aufgaben oder Daten angepasst wird. Fine-Tuning kann das gesamte neuronale Netz betreffen, jedoch haben sich in den letzten Jahren auch parameter-effiziente Methoden wie LoRA (Low-Rank Adaptation) etabliert. Bei LoRA werden nur kleine, trainierbare Zusatzmatrizen ergänzt, während der Großteil der ursprünglichen Modellparameter eingefroren bleibt. Dies reduziert den Rechenaufwand erheblich und ermöglicht die Anpassung großer Modelle auf vergleichsweise kleinen Datensätzen.
+
+Ein weiteres Schlüsselmerkmal aktueller LLMs ist ihre Fähigkeit zu In-Context Learning. Das Modell nutzt dabei allein auf Basis der im Prompt bereitgestellten Beispiele oder Instruktionen neue Aufgabenstrukturen, ohne dass Parameteränderungen notwendig sind. Damit entsteht eine bemerkenswerte Flexibilität: Das Modell kann Aufgaben lösen, für die es nie explizit trainiert wurde, sofern die Aufgabenbeschreibung im Kontext ausreichend präzise ist. Dies ist möglich, da große Sprachmodelle beim Pretraining nicht auf feste Aufgaben, sondern auf das erkennn und Fortführen von Mustern in sehr unterschiedlichen Kontexten optimiert werden. Mithilfe von Beispielen und Instrkutionen im Prompt, welche als temporäre Aufgabenbeschreibung dient, kann das Modell die zugrundeliegenden Regeln abstrahieren ohne seine Parameter anzupassen. 
+
+Die Entwicklung von LLMs markiert einen Paradigmenwechsel in der Sprachverarbeitung. Während klassische Sprachmodelle primär die Wahrscheinlichkeit des nächsten Tokens schätzten, generieren heutige Modelle konsistente, kontextbezogene Texte, beantworten Fragen, strukturieren Inhalte und zeigen zunehmend komplexes reasoning-ähnliches Verhalten. Dadurch verschiebt sich der Fokus von reiner Sprachmodellierung hin zu einer generativen, vielseitig einsetzbaren Sprachintelligenz (Minaee et al., 2024).
+
+Methodik:
+Alternative Architekturstile, wie eine monolithische Struktur wurden bewusst verworfen, da sie die parallele Verarbeitung und spätere Erweiterung des Systems erheblich einschränken würden. Dazu mehr in Kapitel 04 Implementierung. 
+
+Datenfluss und Interaktion der Komponenten
+Der Datenfluss innerhalb des Systems folgt einem klar definierten Ablauf. Zunäcsht werden während eines laufenden Meetings kontinuierlich Transkriptdaten erfasst und an das Backend übertragen. Dort erfolgt eine Segmentierung der Daten in zeitlich begrenzte Abschnitte. 
+
+Die Textsegmente werden anschließend in einer Warteschlange gesammelt, welche nach einem definierten Schwellenwert - in diesem Beispiel einer Gesamtdauer von zehn Sekunden - an die Analysekomponente übergeben wird. Diese erzeugt auf Basis der neuen Informationen eine aktualsierte Zusammenfassung, welche sowohl den aktuellen Gesprächsabschnitt als auch den bisherigen Kontext berücksichtigt. 
+
+Das Ergebnis der Analyse wird anschließend an das Frontend weitergeleitet, wo es den Nutzern nahezu in Echtzeit angezeigt wird. Durch diesen inkrementellen Ansatz bleibt die Zusammenfassung stets aktuell, ohne das das gesamte Transkript erneut verarbeiten werden muss. 
+
+Aus diesem Grund wird die Darstellung der Ergebnisse im ersten Schritt bewusst einfach gehalten. Für den Umfang dieser Arbeit genügt im ersten Schritt eine schlanke Webanwendung, die zunächst ausschließlich eine Zusammenfassung des Gesprochenen anzeigt. Durch diese Grundlage lassen sich später noch weitere Funktionen direkt im Teams-Plugin ergänzen. 
+
+Mithilfe des Microsoft 365 Agents Toolkit lassen sich viele Funktionen bereits umsetzen, allerdings ermöglicht das 
+
+Grundsätzlich existieren mehrere Möglichkeiten, mit Microsoft Teams zu interagieren. Dazu zählen Teams-Bots, Teams-Add-ins zur Einbindung externer Webseiten, sowie sogenannte Teams-Registerkarten (Tabs), die Inhalte direkt innerhalb der Teams-Oberfläche anzeigen. Vor diesem Hintergrund ist geplant, ein Teams-Add-in zu entwickeln und dieses mit einer externen API zu kombinieren. 
+
+Zwar ist das Erstellen von Bots für Teams Grundsätzlich möglich, allerdings werden kritische Funktionen, wie der Zugriff auf Live-Audio oder Live-Transkripte bewusst von Microsoft eingeschränkt. Von Microsoft ist eine Echtzeitverarbeitung des Gesprächsaudios, mit Außnahme von Echtzeittranskripten für Teams nicht vorgesehen. Innerhalb von Teams gibt es die Funktion, automatisch Meetings über Transkriptdaten zusammen fassen zu lassen, allerdings erst nach Ende des Meetings. 
+
+Attendee -> Ziel von Attendee ist es, die plattformspezifische Komplexität dieser Systeme zu abstrahieren und eine standardisierte Anbindung für Forschung und Entwicklung zu ermöglichen.
+
+Backend:
+Im vorliegenen System werden bereits transkribierte Inhalte, die während eines laufenden Meetings in periodischen Intervallen als strukturierte JSON-Objekte übermittelt werden, verarbeitet. Diese Transkriptionsdateien enthalten den gesprochenen Text sowie optionale Metadaten wie Zeistempel, länge des Transkripts oder Sprecherinformationen. 
+
+Das Backend prüft die JSON-Objekte anschließend auf ihre Länge und sammelt Objekte in einer Warteschlange bis ein bestimmter Schwellenwert überschritten wird. Dadurch wird verhindert, dass kurze Transkripte ohne wirklichen Mehrwert trotzdem erfasst werden.
+
+Datenerhaltung und Persistenz 
+Die Datenerhaltung im Backend erfolgt sowohl temporär als auch persistent. Kurzfristig benötigte Daten, wie aktuell gesammelte Transkriptsegmente oder Zwischenstände der Rolling Summary, werden temporär vorgehalten, um eine effiziente inkrementelle Verarbeitung zu ermöglichen. Persistente Speicherung kommt dort zum Einsatz, wo eine spätere Nachvollziehbarkeit oder Wiederverwertung erforderlich ist, beispielsweise für abgeshlossene Meetings oder zu Evaluationszwecken.
+
+Die konkrete Gestaltung der Datenhaltung soll im Rahmen der Implementierung näher erläutert werden. Für den Planungskontext ist entscheidend zu wissen, dass das Backend eine Trennung zwischen flüchtigen Daten und dauerhaft gespeicherten Ergebnissen ermöglicht. 
+
+Kommunkation und Entkopplung
+Zur Kommunkation mit anderen Systemkomponenten nutzt das Backend unterschiedliche Mechanismen. Für klassische Anfragen und Steuerungsoperationen werden REST-basierte Schnittstellen eringesetzt. Die Übertragung von Analyseergebnissen an das Frontend erfolgt hingegen über WebSockets, um eine kontinuierliche und nahezu echtzeitfähige Aktualisierung der Zusammenfassungen zu ermöglichen. 
+
+Zur Unterstützung einer asynchronen Verarbeitung werden Hintergrundaufgaben eingesetzt, die außerhalb des eigentlichen Request-Response-Zyklus ausgeführt werden. Hierzu kommt ein Workerbasiertes Task-System zum Einsatz, das es ermöglicht, rechenintensive Analyseprozesse auszlagern undd as BAckend auch bei hoher Last responsiv zu halten.
+
+Implementierung: 
+
+Zeigen des ersten Prototypen welcher Mit jupyter Notebook entstanden ist
+Probleme die sich ergeben haben (Threading) 
+Warum Jupyter Notebook?
+Welche Annahmen bestätigt wurden (kann man so machen vom prinzip)
+Als erstes wurde das Grundkonzept mit einem schnellen Jupyter Notebook in Python aufgebaut. Dazu mithilfe von Skripten Audiodateien erstellt, welche ins richtige Format gebracht wurden. 
+Um die allgemeine Machbarkeit des Projekts zu Prüfen wurde zuerst in einem Jupyter Notebook ein erstes Grundkonzept aufgebaut, welches den aus dem Masterprojekt bekannten Speech-to-Text Service mit einem LLM verbinden sollte. 
+Zeigen wie es mit eigenem Transkriptionservice funktioniert. 
+
+
+\subsection{Aynchrone Verarbeitung und Entkopplung}
+Um die Responsivität des Systems auch bei rechenintensiven Analyseprozessen sicherstellen, werden zeitaufwändige Aufgaben asynchron verarbeitet. Hierzu kommt ein Worker-basiertes Task-System zum Einsatz, welches es ermöglicht, Analyse- und KI-Aufrufe außerhalb des klassischen Request-Response-Zyklus auszuführen. 
+
+Durch diese Architektur bleibt das Backend auch bei hoher Last ansprechbar, während die eigentliche Analyse im Hintergrund erfolgt. Gleichzeitig trägt dieser Ansatz wesentlich zur Entkopplung der einzelnen Systemkomponenten bei. Transkriptannahme, Analyse, Datenhaltung und Ergebnisübertragung sind klar voneinander getrennt und können unabhängig voneinander weiterentwickelt oder skaliert werden. 
+
+Das Backend von Notisent wurde mit Django ertellt. Django nutzt für die erstellung von Funktionen Apps, welche jeweils eine Aufgabe übernehmen. Für dieses Projekt wurde die Voice app innerhalb von Django erstellt, welche sämtliche funktionen des Meetingassistenten übernehmen wird. 
+Ganz kurz beschreiben wie Struktur wie Notisent backend aufgebaut ist. Daran anschließend erklären wie eigenes Projekt eingebunden wird
+
+Das Notisent Backend ist eine modulare Plattform, welche auf Django und dem Django Rest Framework (DRF) basiert. Es dient als Schnittstelle für die Verarbeitung von Daten, Integration 
+
+\section{Django voice-App}
+Die Django Voice-App stellt die zentrale Verarbeitungseinheit der Anwendung dar. Sie übernimmt die Entgegenahme, Filterung und Weiterverarbeitung aller vom Meeting-Bot gelieferten Daten und bildet damit die Schnittstelle zwischen der externen Transkripterfassung, interner Verarbeitung und Ausgabe an das Frontend. Im Fokus steht dabei die robuste Verarbeitung von Transkriptionsdaten in Echtzeit sowie deren strukturierte Übergabe an das Sprachmodell zur inkrementellen Zusammenfassung. 
+
+Für die Implementierung der Voice-App sind insbesondere die folgenden Trigger relevant: 
+\begin{itemize}
+    \item bot.state-change: Signalisiert Statusänderungen des Bots, etwa beim beitritt zum Meeting, bei aktivem Zustand oder verlassen der Sitzung
+    \item transcript.update: Enthält fortlaufende erkannte Sprachsegmente inklusive Metadaten wie Sprecher, Zeitstempel und Dauer.
+\end{itemize}
+Alle weiteren Trigger und deren funktion lassen sich in Tabelle1234 nachlesen.
+
+Alle eingehenden Nachrichten werden zunächst über einen zentralen Webhook-Endpunkt entgegengenommen. Innerhalb dieses Endpunkts erfolgt eine erste Filterung anhand des jeweiligen Triggertyps. Nicht relevante Ereignisse werden verforfen oder lediglich protokolliert, während transkriptionsrelevante Nachrichten an die eigentliche Verarbeitungspipeline übergeben werden. 
+
+\subsection{Warteschlangenbasierte Verarbeitung}
+Die zentrale Herausforderung bei der Verarbeitung von Live-Transkripten liegt in der stark variierenden Länge einzelner Sprachsegmente. Kurze Äußerungen wie Zustimmungssignale (ja, okay) würden bei unmittelbarer Weiterverarbeitung zu einer hohen Anzahl unnötiger LLM-Anfragen führen. 
+
+Aus diesem Grund wird ein warteschlangenbasiertes Verfahren eingesetzt. 
+1. Eingehende "transcript.update" Nachrichten werden nicht sofort verarbeitet und ans LLM geschickt. 
+2. Jede eingehende Nachrichti mit diesem Trigger wird auf ihre Dauer geprüft und anschließend einer Redis-basierten Warteschlange hinzugefügt. 
+3. Parallel wird die Gesamtdauer der aktuellen Warteschlange mit allen Nachrichten ermittelt.
+4. Überschreitet die Gesamtdauer einen definiertern Schwellenwert von zehn Sekunden Gesamtdauer, wird die Warteschlange zur Weiterverarbeitung freigegeben. 
+
+Einzelne Transkriptsegmente werden dabei zu einem zusammenhängenden Textblock aggregiert, welcher die Grundlage für den nächsten verarbeitungsschritt durch das Sprachmodell bildet. 
+
+Durch dieses Vorgehen wird sicher gestellt, dass sehr kurze Äußerungen sinnvoll zusammengefasst werden, die Anzahl der LLM Aufrufe reduziert wird, die inhaltliche Kohärenz der Zusammenfassung erhalten bleibt und dass genug Text vorhanden ist um eine sinnvolle Zusammenfassung zu erstellen. 
+
+\subsection{Inkrementelle Verarbeitung und Rolling Summary}
+Nach Überschreiten des Schwellenwerts wird der aggregierte Transkirptblock an das LLM weitergeleitet. Die Voice-App verfolgt hierbei einen inkrementellen Ansatz zur Zusammenfassung, der als Rolling Summary bezeichnet wird. 
+
+Dabei wird nicht jedes Mal eine vollständige Zusammenfassung neu erzeugt. Stattdessen erfolgt die Verarbeitung auf Basis zweier Komponenten. 
+1. der bisherigen Zusammenfassung (previous summary), 
+2. des neu eingetroffenen Transkriptblocks
+
+die Vorherige Zusammenfassung wird zwischengespeichert und bei jeder neuen Verarbeitung erneut an das LLM übergeben. Dadurch entsteht eine fortlaufend wachsende, in sich konsistente Zusammenfassung, die den gesamten bisherigen Gesprächsverlauf berücksichtigt. 
+
+Dieses Verfahren bietet mehrere Vorteile: Reduzierung der Tokenmenge pro Anfrage, höhere Konsistenz über längere Meetings hinweg, geringere Latenzzeiten, bessere Kontrolle über die inhaltliche Struktur der Zusammenfassung 
+
+Die erzeugte neue Zusammenfassung ersetzt anschließend die vorherige Version und wird sowohl im Cache als auch persistent in der Datenbank gespeichert.
+
+\subsection{Weitergabe der Ergebnisse an das Frontend}
+Nach Abschluss der Verarbeitung wird die aktualisierte Zusammenfassung an zwei stellen weitergegeben. 
+
+1. Persistenzschicht: Die aktuelle Version der Zusammenfassung wird als neuer Datensatz in der Notisent Datenbank gespeichert. Dadurch ist eine spätere Analyse oder Wiederherstellung jederzeit möglich. 
+2. WebSocket-Verbindung: Die aktualisierte Zusammenfassung wird über einen WebSocket-Kanal an das Frontend übertragen. Dabei wird bewusst nur die jeweils neuste Version gesendet, da diese aufgrund des Rolling-Summary-Ansatzes stets den vollständigen aktuellen Stand repräsentiert. 
+
+Dieses Vorgehen reduziert die übertragene Datenmenge und vereinfacht die Darstellung auf Client-Seite erheblich, da keine Zusammenführung mehrerer Teilzusammenfassungen notwendig ist. 
+
+Implementierung: 
+\begin{lstlisting}[label=lst:sys_prompt, caption=Systemprompt des Agenten, language=python, style=pythonstyle]
+self.system_prompt = f"""You are {self.name}, an AI assistant that can think step-by-step (chain-of-thought) and use tools when necessary.
+When you need to use a tool, output 'Action: <tool_name>' and 'Action Input: <input>'.
+You have access to the following tools: {tool_descriptions}.
+Here are some examples: {email_examples}.
+Use plain text without mardown syntax for your reasoning and tool calls.
+Always call the tools with a proper online input.
+Wait for the result, then continue your reasoning."""
+\end{lstlisting}

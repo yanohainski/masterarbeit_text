@@ -12,131 +12,193 @@ Das System muss:
     \item die Transkription zu analysieren
     \item mit Microsoft Teams kompatibel sein
     \item in Echtzeit arbeiten
-    \item Das System muss das Gespräch sinnvoll und ohne Informationsverlust zusammenfassen
-    \item Das System muss die Informationen für alle Teilnehmer anzeigen.
+    \item das Gespräch sinnvoll und ohne Informationsverlust zusammenfassen
+    \item die Informationen für alle Teilnehmer anzeigen.
 \end{itemize}
 
 Im Zuge der Bearbeitung dieser Masterarbeit konnte ich mich ausgiebig mit einem Manager bei Bosch Powertrain Solutions unterhalten, welcher sich für das Thema begeistern konnte. 
-Aus seinen schilderungen wie der aktuelle Workflow für die Dokumentation abläuft und wünschen konnten weitere Anforderungen an das system abgeleitet werden, welche konkreten nutzen in der Wirtschaft hätten. 
+Aus seiner Schilderungen seines aktuellen Workflow wie die Dokumentation von Meetings abläuft und wünschen konnten weitere Anforderungen an das system abgeleitet werden, welche konkreten nutzen in der Wirtschaft hätten. 
 
 Kann Anforderungen: 
 \begin{itemize}
-    \item Sprechererkennung
-    \item Zugriff auf Datenbank für Kontext, mit Notisent Agent gemeinsam. Hintergrundinformationen basierend auf Gesprächsinhalt darstellen.
+    \item Sprechererkennung, das System erkennt die aktuell sprechende Person.
+    \item Zugriff auf eine Datenbank für Kontext, das System erkennt mithilfe von Keywords Themen und zeigt dazu entsprechende Kontextinformationen an.
     \item Unterschiedliche Modi je nach Teilnehmer. "High Level Wrap up" und detailierte Expertendiskussion
     \item Gemeinsame Reviewfunktion der Gesamtzusammenfassung im Anschluss des Meetings für alle Teilnehmer
     \item Gemeinsames anpassen und Bearbeiten der Gesamtzusammenfassung für alle Teilnehmer
-    \item Die Referenzen zur Erstellung der Zusammenfassung aus den Meeting Minutes einsehbar. Anzeige bei Bedarf     
+    \item Die Referenzen zur Erstellung der Zusammenfassung aus den Meeting Minutes einsehbar.  
 \end{itemize}
 
-
-
+\newpage
 \section{Planung der Softwarearchitektur}
-Kurze Grafik, wie mit der Software interagiert wird. Ablaufdiagramm
-In diesem Kapitel soll beschrieben werden wie die Software in der Theorie geplant wurde. Was für komponenten wichtig und wie diese miteinander Interagieren. 
-Genauer beschrieben werden soll das ganze anschließend in Kapitel 04 Implementierung. Dort geht es um darum wie die Software umgesetzt wurde. 
-Wie Funktioniert das Gesamtkonzept. 
+Die Planung der Softwarearchitektur bildet die Grundlage für die spätere Implementierung des in der Arbeit entwickelten Meetingassistenten. Ziel der Architektur ist es, eine robuste, erweiterbare und für Echtzeitverarbeitung geeignete Struktur zu entwerfen, die den Anforderungen der Live Verarbeitung gesprochener Inhalte gerecht wird. 
 
-Planung der Software, Umsetzung in Kapitel 4 Implementierung
-Projekt wird in unterteile definiert, welche in Abbilung X (Highlevel Overview software veranschaulicht worden) Aufgegriffen und beschrieben. 
+Im Zentrum steht dabei die inkrementelle Verarbeitung kontinuierlich anfallender Transkriptdaten, sowie deren schrittweise Analyse und Zusammenfassung mithilfer von Large Language Models. Dadurch ergeben sich spezifische Anforderungen an Entkopplung, Asynchronität und Skalierbarkeit der Systemkomponenten. 
 
-Hier soll auch gezeigt werden welche schritte zur Umsetzung geplant waren.
-Hauptkomponenten des Systems: Grafische Bedienoberfläche zum Starten des Assistenten, sowie anzeige der Zusammenfassung 
+Für das Gesamtsystem wurde ein Pipeline Ansatz gewählt. Dieser Stil eigenet sich besonders für Anwendungen bei denen Daten nicht in abgeschlossenen Batches sondern fortlaufend verarbeite werden. Im vorliegenden Fall entstehen durch die Live-Transkripte kontinuierlich neue Textsegmente, die unmittelbar weiterverarbeitet werden müssen. 
 
+Ein wesentlicher Vorteil dieses Ansatzes liegt in der klaren Entkopplung der einzelnen Komponenten. Die Erfassung der Transkriptdaten, die Analyse durch das Sprachmodell sowie die Darstellung im Frontend können unabhängig voneinander entwickelt, skaliert und optimiert werden. Gleichzeitig ermöglicht die lose Kopplung, einzelne Komponenten bei Bedarf auszutauschen, ohne das Gesamtsystem grundlegend anzupassen. 
 
+\subsection{Überblick über die Systemkomponenten} 
+Die geplante Architektur setzt sich aus mehrern logisch getrennten Hauptkomponenten zusammen, die in Abbildung dargestellt sind: 
 
-\subsection{Interaktion, Frontend}
-Die Interaktion zwischen Anwender und Meetingassistent bildet die zentrale Schnittstelle zur Außenwelt und ist damit entscheidend für die Benutzerfreundlichkeit des gesamten Systems. Ohne eine klare, leicht verständliche Oberfläche verliert selbst die beste Analyse im Hintergrund ihren Nutzen. Geplant ist daher die Entwicklung eines Microsoft-Teams-Plugins, das relevante Informationen strukturiert darstellt. Auf Details zur konkreten Darstellung wird später eingegangen. Zunächst soll die grafische Oberfläche dem Nutzer vor allem ermöglichen, den Assistenten gezielt zu starten und dessen Ergebnisse einzusehen.
+\textbf{Meeting-Zugriffskomponente}
 
-Technisch basiert der Ansatz auf der Nutzung der Attendee API, mit deren Hilfe Audioinhalte aus einem Teams-Meeting extrahiert und an ein Backend zur Weiterverarbeitung gestreamt werden können. Genau hier zeigte sich jedoch eines der größten Probleme während der Recherche: Der Zugriff auf Microsoft Teams ist stark reglementiert. Zwar ist das Erstellen von Bots grundsätzlich möglich, allerdings werden kritische Funktionen wie der Zugriff auf Live-Audio bewusst eingeschränkt. In der Praxis bedeutet das, dass eine Echtzeitverarbeitung des Gesprächsaudios nicht vorgesehen ist und lediglich nachträgliche Zusammenfassungen durch Teams selbst bereitgestellt werden. Das setzt klare Grenzen, mit denen offen umgegangen werden muss.
+Diese Komponente ist für den automatisierten Beitritt zu Online-Meetings sowie die Erfassung von Transkript- und Metadaten verantwortlich. Sie stellt die Rohdaten für alle nachgelagerten Verarbeitungsschritte bereit 
 
-Aus diesem Grund wird die Darstellung der Ergebnisse im ersten Schritt bewusst einfach gehalten. Für den Umfang dieser Arbeit genügt eine schlanke Webanwendung, die zunächst ausschließlich eine Zusammenfassung des Gesprochenen anzeigt. Diese reduzierte Lösung ist kein Nachteil, sondern eine bewusste Entscheidung: Sie schafft eine stabile Grundlage, auf der später weitere Funktionen direkt im Teams-Plugin ergänzt werden können.
+\textbf{Backend System}
 
-Grundsätzlich existieren mehrere Möglichkeiten, mit Microsoft Teams zu interagieren. Dazu zählen Teams-Bots, Teams-Add-ins zur Einbindung externer Webseiten – vergleichbar mit Outlook-Add-ins – sowie sogenannte Teams-Registerkarten (Tabs), die Inhalte direkt innerhalb der Teams-Oberfläche anzeigen. Vor diesem Hintergrund ist geplant, ein Teams-Addon zu entwickeln und dieses mit einer externen API zu kombinieren. So lässt sich die eingeschränkte Funktionalität von Teams sinnvoll erweitern, ohne die technischen oder sicherheitsrelevanten Grenzen der Plattform zu ignorieren.
+Das Backend fungiert als zentral Organisationseinheit. Es übernimmt die Annahme der Transkriptdaten, deren Vorverarbeitung sowie die Koordination zwischen Analyse und Frontend. Darüber hinaus ist es für Authentifizierung, Datenerhaltung und die Kommunikation mit externen KI-Diensten zuständig. 
+
+\textbf{Analyse- und LLM- Komponente} 
+
+Diese Komponente verarbeitet die transkribierten Textsegmente inkrementell. Mithilfer geeigneter Prompting-Strategien und einer Rolling Summary-Logik werden fortlaufend aktualisierte Zusammenfassungen erzeugt. 
+
+\textbf{Frontend-Anwendung} 
+
+Das Frontend dient hauptsächlich der Darstellung der Analyseergebnisse für die Meeting-Teilnehmer. Das Frontend empfängt aktualisierte Zusammenfassungen in Echtzeit und stellt diese strukturiert dar.
+
+\subsection{Interaktion und Frontend}
+Die Interaktion zwischen Anwender und Meetingassistent bildet die zentrale Schnittstelle zur Außenwelt und ist damit entscheidend für die Benutzerfreundlichkeit des gesamten Systems. Geplant ist die Entwicklung eines Microsoft-Teams-Plugins mithilfe des Microsoft 365 Agents Toolkits, das relevante Informationen strukturiert in Echtzeit darstellt. Die grafische Oberfläche soll dem Nutzer ermöglichen, den Assistenten gezielt zu starten und dessen Ergebnisse einzusehen. Die Darstellung der Ergebnisse wird dazu im ersten Schritt bewusst einfach gehalten mittels einer schlanken Webanwendung, welche ausschließlich eine Zusammenfassung des gesprochenen anzeigt. Weitere Funktionen lassen sich im Nachgang noch später erweitern. 
+
+Das Microsoft 365 Agents Toolkit stellt ein Set von Entwicklerwerkzeugen und Bibliotheken, mit welchem sich diverse Apps für Microsoft Tools wie Teams und Outlook erstellen lassen. Leider ermöglicht das Toolkit keinen Zugriff auf Live-Audio Inhalte aus Teamsmeetings.Um eine Echtzeitverarbeitung und -analyse des Meetinginhalts zu ermöglichen muss daher auf eine externe API namens Attendee zugegriffen werden, welche im nächsten Kapitel näher beschrieben wird.  
 
 \subsection{Zugriff auf Meetingdaten}
-Verwendung von Attendee als API um auf Teams Meetingdaten zuzugreifen. Attendee funktioniert über Browserautomatisierung, dabei wird das Meeting über die Meeting URL in einem Headless Browser geöffnet.  (Browser ohne UI) 
-Browserautomation kurz erklären 
-Über Browserautomatisierung (Playwright) nimmt der Bot nun am Meeting teil, dabei wird ein weiterer User simuliert. Dadurch kompabilität mit Teams USer interface. 
-WAs kann der Bot alles machen? 
-Recording, Transcription, Speech, Avatars und Chat. Transcription mit Deepgram API Key möglich. Verchiedene Einstellungsmöglichkeiten 
+Attendee ist eine entwicklerorientierte, quelloffene Plattform zur automatisierten Teilnahme an Videokonferenzen sowie zur Erfassung und Weiterverarbeitung von Meeting-Daten. Das Tool stellt eine einheitliche Programmierschnittstelle bereit, über die sogenannte Meeting-Bots in gängigen Videokonferenzsystemen wie Zoom, Google Meet und Microsoft Teams gesteuert werden können. 
 
-Transcriptionservice von Attendee, allerdings anbinudng an externen Service wie Deepgram. Weiterhin auch die Auf eigenen Lösung zurückgreifen aus der Masterarbeit.  
+Die technische Umsetzung von Attendee basiert auf Browser-Automatisierung. Dabei wird ein realer Webbrowser programmgesteuert verwendet, um Videokonferenzen über die offiziellen Web-Clients der jeweiligen Plattformen zu betreten. Der Bot verhält sich somit funktional wie ein regulärer menschlicher Teilnehmer, einschließlich Authentifizierung, Beitritt zum Meeting, Medienverarbeitung und Interaktion mit der Benutzeroberfläche. Dieser Ansatz erlaubt es, ohne tiefe oder proprietäre Integrationen in die jeweiligen Plattform-APIs auszukommen, die häufig eingeschränkt, instabil oder nicht öffentlich dokumentiert sind.
 
-Um Zugriff auf die Audiodateien innerhalb eines Teams Meetings zu erhalten wurde Attendee verwendet. 
-Attendee API 
-Wie funktioniert, wie wurde eingesetzt
-Vorherige Probleme mit erstellen von Teams Bot über MS Graph API und Azure erwähnen
-Um zugriff auf 
+Durch die Nutzung der Browser-Automatisierung kann Attendee Audio- und Videostreams direkt aus dem Meeting erfassen und für weitere Verarbeitungsschritte, wie beispielsweise die automatische Transkription oder Analyse, bereitstellen. 
 
-Attendee ist eine entwicklerorientierte, quelloffene Plattform zur automatisierten Teilnahme an Videokonferenzen sowie zur Erfassung und Weiterverarbeitung von Meeting-Daten. Das Tool stellt eine einheitliche Programmierschnittstelle bereit, über die sogenannte Meeting-Bots in gängigen Videokonferenzsystemen wie Zoom, Google Meet und Microsoft Teams gesteuert werden können. Ziel von Attendee ist es, die plattformspezifische Komplexität dieser Systeme zu abstrahieren und eine standardisierte Anbindung für Forschung und Entwicklung zu ermöglichen.
-
-Die technische Umsetzung von Attendee basiert unter anderem auf Browser-Automatisierung. Dabei wird ein realer Webbrowser programmgesteuert verwendet, um Videokonferenzen über die offiziellen Web-Clients der jeweiligen Plattformen zu betreten. Der Bot verhält sich somit funktional wie ein regulärer menschlicher Teilnehmer, einschließlich Authentifizierung, Beitritt zum Meeting, Medienverarbeitung und Interaktion mit der Benutzeroberfläche. Dieser Ansatz erlaubt es, ohne tiefe oder proprietäre Integrationen in die jeweiligen Plattform-APIs auszukommen, die häufig eingeschränkt, instabil oder nicht öffentlich dokumentiert sind.
-
-Durch die Nutzung der Browser-Automatisierung kann Attendee Audio- und Videostreams direkt aus dem Meeting erfassen und für weitere Verarbeitungsschritte, wie beispielsweise die automatische Transkription oder Analyse, bereitstellen. Gleichzeitig bringt dieser Ansatz technische Herausforderungen mit sich, da Änderungen an den Web-Oberflächen der Konferenzplattformen die Stabilität der Automatisierung beeinflussen können. Attendee adressiert diese Problematik durch eine modulare Architektur und regelmäßige Anpassungen an die unterstützten Plattformen.
-
-In dieser Arbeit wurde Attendee eingesetzt, um Videokonferenzen automatisiert aufzuzeichnen und Sprachdaten für die nachgelagerte Analyse bereitzustellen. Die Kombination aus API-basierter Steuerung und browserbasierter Automatisierung ermöglichte eine reproduzierbare und skalierbare Datenerhebung, ohne eine eigene Implementierung plattformspezifischer Konferenzschnittstellen vornehmen zu müssen.
-
+In dieser Arbeit wird Attendee eingesetzt, um Konferenzen aufzuzeichnen und Transkriptdaten für die nachgelagerte Analyse bereitzustellen. Attendee greift dabei auf die Teams eigene Transkription des Meetings zu, welche als Live-Untertitel innerhalb des Meetings verfügbar ist und sendet diese über einen Webhook an das vorgesehene Backend.
 
 \subsection{Backendfunktionen}
-Was ist Django? 
-Die Backendfunktionen sollen vom bestehenden Notisent Backend übernommen werden und durch zusätzliche funktionen erweitert werden. Das gesamte Backend von Notisent wurde in Pythons Webframework Django entwickelt. 
+Das Backend bildet das zentrale Bindeglied zwischen der Erfassung der Meetingdaten, der Analyse durch KI-Modelle und der Bereitstellung der Ergebnisse für das Frontend. Seine Hauptaufgabe besteht darin, eingehende Datenströme zu koordinieren, zwischen den einzelnen Systemkomponenten zu vermitteln und eine entkoppelte, asynchrone Verarbeitung der Analyseprozesse zu ermöglichen. 
 
-Backend handelt files, Umwandlung in richtigen Datentyp, und leitet die daten weiter an die richtige stelle. 
-Aufbau des Notisent Backends kurz erläutern, da in die Struktur eingebaut wird. Wird näher in Kapitel 4 Implementierung drauf eingegangen. Hier nur Ganz grundsätzlich. Welche funktionen hat das Backend noch? API Zugriff auf AI Modelle KISSKI, Authentifizierung und Datenbank 
-Beim Backend wird die vorhandene Backendstruktur von Nostisent genutzt und um eine eigene App erweitert. Das Backend von Notisent wurde mit Django gebaut.
-Backend nimmt Audio entgegen von Meeting, wandelt in richtiges Datenformat(WAV) darüber hinaus kümmert er sich um Chunking der gestreamten Daten und  sendet es an den Transcription container. HTTP Verbindnng. 
-Nimmt Transkribierten TExt entgegen und sendet ihn über API an KI Schnittstelle wo Modelle gehostet werden. 
-Sicherheitsfunktionen
-Tasks mit Worker Celery, dadurch asynchrone verarbeitung möglich. 
+Für die Umsetzung des Backends wird auf die bestehende Backend-Infrastruktur von Notisent zurückgegriffen, die vollständig auf dem Python-Webframework Django basiert. Django ist ein weit verbreitetes, serverseitiges Framework, das insbesondere für Datengetriebene Webanwendungen geeignet ist und Funktionen für Routing, Authentifizierung, Datenbankanbindung sowie Sicherheitsmechanismen bereitstellt. Durch die Nutzung dieser bestehenden Infrastruktur kann auf bewährte Komponenten zurückgegriffen und der Entwicklungsaufwand reduziert werden. 
+
+Das Backend von Notisent ist modular aufgebaut und folgt dem App-Konzept von Django. Funktional getrennte Bereiche werden in eigenständigen Apps umgesetzt, die jeweils klar definierte Aufgaben übernehmen. Der in dieser Arbeit entwickelte Meetingassistent wird als zusätzliche App in diese bestehende Struktur integriert. Auf diese Weise kann die vorhandene Architektur weiterverwendet und gezielt um neue Funktionalitäten erweitert werden, ohne bestehende Komponenten zu verändern.
+
+Die zentrale Aufgabe des Backends ist die Entgegennahme und Vorverarbeitung der Meetingdaten. Meetingtranskripte, welche von Attendee in periodischen Invervallen als strukturiertes JSON-Objekt übermittelt werden, sollen vom Backend entgegengenommen und an die Analysekomponente weitergeleitet werden. Diese JSON Objekte enthalten neben dem Transkript noch weitere Metadaten, wie die länge des Transkripts und Sprecherinformationen, welche im weiteren Verlauf noch relevanz haben. 
+
+Das Backend übernimmt ebenfalls die Datenerhaltung und Zwischenspeicherung. Kurzfristig benötigte Daten wie aktuelle Transkripte und die aktuelle Zusammenfassung, sollen im Backend temporär zwischengespeichert werden, während Vollständige Zusammenfassungen nach abschluss eines Meetings in der Notisent-Datenbank gepeichert werden sollen. Dadurch lassen sich für spätere Evaluation und Nachvollziehbarkeit noch auf Daten zugreifen. 
+
+Darüber hinaus übernimmtd as Backend die Weiterleitung der aufbereiteten Textdaten an einen externen KI-Dienst. Über definierte API-Schnittstellen wird auf die in der Notisent-Infrastruktur angebundenen KI-Modelle zugegriffen, die für die Analyse und Zusammenfassung der Inhalte zuständig sind. Das Backend fungiert dabei als vermittelnde Instanz, die Anfragen strukturiert, Ergebnisse entgegennimmt und für die weitere Nutzung bereitstellt.
+
+Für die Kommunikation mit anderen Komponenten sollen verschiedene Mechanismen zur Nutzung kommen, für klassische Anfragen und Steuerungsoperationen werden REST-basierte Schnittstellen eingesetzt, Transkriptdaten sollen über einen Webhook ins Backend gelangen und die Übertragung von Analyseergebnissen ans Frontend erfolgt über Websockets.
+
+Ein weiteres wichtiges Entwurfsziel der Backend-Architekrur ist die Entkopplung der einzelnen Komponenten. Transkription, Analyse, Datenhaltung und Darstellung sind so voneinander getrennt, dass sie unabhängig voneinander weiterentwickelt oder ausgetauscht werden können. Diese lose Kopplung erhöht die Wartbarkeit des Systems und erleichtert zukünftige Erweiterungen. 
 
 \subsection{Analyse des Transkripts}
-KI-Modelle auf Kisski Gehosted, wird über eine API zugegriffen. 
-Stellt verschiedene Modelle bereit. Prompts sollen mithilfe von DSPY aufbereitet werden. 5 Sekunden transkribiertes Audio wird in Textform mit entsprechendem Prompt an 
+Geplant ist die Analyse von Transkriptdaten mittels LLMs. Die Bereitstellung und Verwaltung der KI-Modelle wird an KISSKI ausgelagert, indem deren Completion API verwendet wird. Dieser API Service bietet eine zur OpenAI API kompatible Möglichkeit Prompts zu senden und von einem LLM prozessieren zu lassen. (KISSKI quelle) Dies erleichtert das Management von LLMs und ermöglicht es, schnell Modelle auszutauschen, da die Entwicklung in diesem Bereich schnell voranschreitet. 
 
-Für den Einsatz einer KI ist diese geplant, dadurch werden diese Features ermöglicht. 
-
-DSPy (Declarytive Self-improving Python) ist ein deklaratives framework zum bauen modularer KI Software. Higher level language for AI programming 
-Für jede Ki Kmoponente im System wird ein Input/Output verhalten als Signature. 
+Die Prompts werden mit dem Framework DSPy erstellt, wodurch ein reproduzierbarer, wartbarer und skalierbarer Prompt-Workflow entsteht. Ein zentraler Vorteil von DSPy liegt darin, dass Prompt-Enginering nicht mehr als manuelle Feinarbeit verstanden wird, sondern als optimierbarer Bestandteil der Systemarchitektur. Durch die deklarative Beschreibung der Aufgabenlogik kann DSPy automatisch geeignete Prompt-Verfahren erlernen und verbessern, ohne das jedes Detail händisch angepasst werden muss.
 
 DSPy (Declarative Self-improving Python) ist ein Framework, das den Einsatz großer Sprachmodelle systematischer und verlässlicher gestaltet. Statt Prompts manuell zu optimieren, strukturiert DSPy LLM-Interaktionen in klar definierte Module – etwa für Retrieval, schrittweises Reasoning oder Antwortgenerierung. Diese Module beschreiben die Aufgabenlogik, während DSPy automatisch optimiert, wie das Modell diese Aufgaben am effektivsten ausführt.
 
-Die Optimierung erfolgt ohne klassisches Finetuning, sondern über Compiler- und Suchverfahren, die passende Beispiele, Zwischenschritte und Promptstrukturen erzeugen. Dadurch werden LLM-Pipelines stabiler, reproduzierbarer und weniger anfällig für Variabilität in der Modellausgabe. Besonders bei komplexen Systemen wie RAG-Architekturen oder mehrstufigen Analyseprozessen bietet DSPy deutliche Vorteile, da es robuste Ergebnisse fördert und den Entwicklungsaufwand reduziert.
-
-DSPy ermöglicht somit eine klare Trennung zwischen Aufgabenbeschreibung und Modellsteuerung und trägt dazu bei, LLM-basierte Anwendungen transparenter, besser wartbar und methodisch fundierter umzusetzen.
-DSPY: COMPILING DECLARATIVE LANGUAGE
-MODEL CALLS INTO SELF-IMPROVING PIPELINES and github seiten von DSPY
 
 \section{Auswahl des LLM}
-Bei der Auswahl des LLMs 
-Vergleich verschiedener Modelle, vor und nachteile. Auswahl basierend auf papern und eigenen versuchen 
-Für das Projekt wird GPT-OSS verwendet, ist das von Notisent aktuell verwendete Modell für Ihre KI aufgaben. 
-Kurzbeschreibung was das kann und wie es in Benchmarks abschneidet. 
-Weitere Modelle erwähnen, GPT-OSS ist Decoder Only Modell von OpenAi, open weight von notisent gewähltes modell. 
+Die Auswahl eines geeigneten LLM stellt einen zentralen Schritt bei der Entwicklung des in dieser Arbeit beschriebenen Meetingasistenten dar. Das gewählte Modell beeinflusst sowohl die Qualität der erzeugten Zusammenfassungen als auch die technische Umsetzbarkeit einer inkrementellen, nahezu echtzeitfähigen Verarbeitung. Im Gegensatz zu klassischen NLP-Anwendungen, bei denen Texte vollständig vorliegen, müssen im vorliegenden Anwendungsfall kontinuierlich entstehende Textsegmente verarbeitet und kontextuell zusammengeführt werden. Daraus ergeben sich besondere Anforderungen an Latenz, Kontextverarbeitung und Stabilität der Modellausgabe. (A Survey of Text Summarization Models; Zhang)
+
+Ziel dieses Kapitels ist es, die Kriterien für die Modellauswahl darzulegen, alternative Modelle kurz zu vergleichen und die Entscheidung für das im Projekt eingesetzte Modell nachvollziehbar zu begründen. 
+
+\subsection{Auswahlkriterien} 
+Für die Bewertung potenzieller LLMs wurden mehrere Kriterien herangezogen, die sich aus den Anforderungen des Systems sowie aus den Rahmenbedingungen des Einsatzkontexts ergeben. Ein wesentliches Kriterium ist die Inferenzlatzenz des Modells, da der Meetingassistentz während eines laufenden Meetings regelmäßig aktualisierte Zusammenfassungen erzeugen soll. Daher müssen die Inferenzzeiten kurz genug sein, um eine wahrnehmbare Verzögerung für die Nutzer zu vermeiden. 
+
+Ein weiteres zentrales Kriterium ist die Qualität der generierten Texte. Für Meeting-Zusammenfassungen sind insbesondere Kohärenz, Prägnanz und die Fähigkeit zur inhaltlichen Abstraktion relevant. Das Modell muss in der Lage sein, auch aus fragmentierten oder informellen Äußerungen strukturierte Kernaussagen zu extrahieren. 
+
+Weitere Auswahlkriterien betreffen die Betriebskosten, die Möglichkeit zur lokalen oder kontrollierten Bereitstellung sowie die Integrationsfähigkeit in bestehende Systemlandschaften. Insbesondere im Unternehmenskontext spielen Datenschutz, Reproduzierbarkeit und langfristige Verfügbarkeit eine wichtige Rolle. Diese Punkte spielen in der ersten Betrachtung eine untergeodrnete Rolle, sollten aber aufgrund des Hintergrunds von Notisent, einen Datenschutzkonformen Arbeitsassistenten zu entwicklen, trotzdem nicht komplett außer Acht gelassen werden. 
+
+\subsection{Vergleich verschiedener Modelle} 
+Auf Basis der genannten Kriterien wurden mehrere aktuelle Large Langugage Models mit verschiedenen Architekturen betrachtet. Dazu zählen unter anderem T5 von Google als vertreter der Encoder-Decoder Modelle, Bert als Encoder-Only Modell sowie das von Notisent bereits eingesetzte GPT-OSS, ein Decoder-Only Modell.  
+
+\textbf{Text-to-Text Transfer Transformer (T5)}
 
 
+Der Text-To-Text Transfer Transformer (T5) ist ein von Google AI entwickeltes Modell, das alle NLP-Aufgaben einheitlich als Text-zu-Text Problem formuliert. (Exploring the Limits of Transfer Learning with a Unified Text-to-Text, Raffel) Es basiert auf einer klassischen Transformer Architektur bestehend aus Encoder und Decoder, bei der der Encoder die Eingabesequenz verarbeitet und der Decoder daraus eine neue Textsequenz generiert. 
+
+Dadurch eignet sich T5 insbesondere für Aufgaben wie Textzusammenfassung, Paraphrasierung oder Frage-Antwort-Systeme. Das Modell wird auf große Textkorpora vortrainiert und kann anschließend auf spezifische Aufgaben feinjustiert werden. Für die vorliegende Anwendung ist insbesondere die Fähigkeit zur strukturierten Textgenerierung relevant. 
+
+Nachteilig ist jedoch der vergleichsweise hohe Rechenaufwand der Encoder-Decoder-Architektur im Vergleich zu anderen Architekturen, der sich insbesondere bei kontinuierlicher Verarbeitung längerer Texte negativ auf Latenz und Skalierbarkeit auswirken kann.
+
+\textbf{BERT} 
+
+Bert ist ein Encoder-Only Modell, das für das tiefe bidirektionale Sprachverständnis entwickelt wurde. (BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding, Devlin) Es erzeugt kontextabhängige Repräsentationen, indem es den gesamten Eingabetext gleichzeitig verarbeitet. 
+
+Die Stärken von Bert liegen insbesondere in Aufgaben wie Textklassifikation, Named-Entity-Recognition, semantischer Ähnlichkeitsberechnung und Informationsextraktion. Für generative Aufgaben ist Bert jedoch nicht ausgelegt, da keine autoregressive Textgenerierung vorgesehen ist. Eine Nutzung für Meeting Zusammenfassungen würde zusätzliche Modelle oder Post-Processing-Schritte erfordern und ist daher für den vorliegenden Anwendungsfall nur eingeschränkt geeignet. 
+Devlin et al., “BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding”, NAACL 2019
+
+\textbf{GPT-OSS}
+
+GPT-OSS ist ein von OpenAi entwickeltes Modell und basiert auf einer Decoder-Only Architektur und folgte einem autoregressiven Generationsprinzip. Das Modell erzeugt Text tokenweise auf Grundlage des bisherigen Kontexts und eignet sich besonders für generative Aufgaben wie Dialogführung und Textzusammenfassung. 
+
+Ein wesentlicher Vorteil von GPT-OSS liegt in der offenen Verfügbarkeit der Modellgewichte, wodurch eine kontrollierte und datenschutzkonforme Nutzung innerhalb der bestehenden Notisent-Infrastruktur möglich ist. Darüber hinaus bietet das Modell eine günstige Balance zwischen Textqualität, Kontextverarbeitung und Inferenzgeschwindigkeit, was es für den Einsatz in einem Live-System wie diesem Projekt 
+
+\subsection{Begründung der Modellwahl}
+Für die Umsetzung des Prototypen wurde GPT-OSS als zentrales Sprachmodell gewählt. Ausschlaggebend hierfür war insbesondere die bereits bestehende Nutzung innerhalb der Notisent-Umgebung, wodurch eine einheitliche Modellbasis, vereinfachte Wartung und klare Compliance-Strukturen gewährleistet werden. 
+
+Die Decoder-Only-Architektur ermöglicht eine inkrementelle Textverarbeitung und ist damit gut für die schrittweise Zusammenfassung laufender Meetings geeignet. Encoder-Decoder-Modelle wie T5 bieten zwar konzeptionelle Vorteile für klassische Zusammenfassungsaufgaben, sind jedoch hinsichtlich Latenz und Integrationsaufwand weniger geeignet. Encoder-Only-Modelle wie Bert scheiden aufgrund fehlender Generationsfähigkeit aus. 
+
+Zu beachten ist, dass GPT-OSS, wie andere generative Spprachmodelle, nicht für sicherheitskritsiche Anwendungen ohne menschliche Kontrolle vorgesehen ist. Für den hier betrachteten Anwendungsfall der Unterstützdenden Meetingzusammenfassung ist das Modell jedoch ausreichend leistungsfähig. Der modulare Aufbau des Systems ermöglicht zudem eine spätere Substitutuion oder Erweiterung durch alternative Modelle. 
 
 \section{Evaluatinskriterien und Testverfahren}
+Die Evaluation des entwickelten Meetingassistenten verfolgt das Ziel, die Qualität der erzeugten Live-Zusammenfassung systematsich zu bewerten und mit nachträglich erzeugten Zusammenfassungen vollständiger Meetingtranskripte zu vergleichen. Da es sich bei der Zusammenfassung gesprochener Inhalte um eine inhaltlich anspruchsvolle und teilweise subjektie Aufgabe handelt wurde ein kombiniertes Evaluationskonzept gewählt, das sowohl automatsiche Metriken als auch qualitative Vergleiche berücksichtigt. 
 
-Schwierigkeit das zu evaluieren, subjektiv wie etwas zusammengefasst wird. Nach bestehenen Metriken und benchmarks suchen und einfügen 
+Im Fokus der Evaluation steht dabei nicht die Qualität der Transkription selbst, sondern die Qualität der inhaltlichen Analyse und Zusammenfassung. Die Transkription wird als vorgelagerter Prozess betrachtet und für beide vergleichsvarianten identisch verwendet. 
 
-Zur Bewertung der Live Zusammenfassung lassen sich verschiedene Metriken zu rate ziehen. Dazu wird einmal das Gesamttranskript nach ende des Meetings über die Teams Funktion zusammengefasst und anschließend mit der Live erstellen Zusammenfassung verglichen:
-
+\subsection{Evaluationsgegenstand}
+Gegenstand der Evaluation sind zwei unterschiedlcihe Analyseverfahren desselben Meetings: 
 \begin{itemize}
-    \item ROUGE(1,2,L): misst Überlappungen von Wörtern oder Phrasen zwischen Referenzzusammenfassung und Modelloutput (Klassische Metrik)
-    \item BERTScore: Vergleicht nicht Wörter, sondern deren semantische Einbettung (Semantische Metrik)
+    \item Live-Analyse durch den entwickelten Meetingassistenten
+Während des laufenden Meetings werden periodisch übermittelte Transkripitonssegmente inkrementell verarbeitet. Auf Basis dieser Segmente erzeugt das System fortlaufend eine Rolling Summary, die den aktuellen Stand des Gesprächs widerspiegelt. 
+\item Nachträgliche Analyse des vollständigen Transkripts
+Nach Abschluss des Meetings wird das vollständige Transkript als Ganzes analysiert und in einer einzelnen, zusamenhängenden Zusammenfassung verdichtet. Diese Variante dient als Referenz, da hier der vollständige Kontext ohne zeitliche Einschränkugnen zur Verfügung steht. Mit diesem Prinzip einer kompletten Meetingzusammenfassung arbeitet auch bereits der Microsoft Teams eigene Service, bei dem das gesamte Meeting nach Abschluss des Meetings zusammengefasst wird. 
 \end{itemize}
 
-Darüber hinaus lassen sich auch mit LLM-basierten Metriken die Qualität der Zusammenfassung bewerten
+ Ziel der Evaluation ist es zu untersuschen, inwieweit sich die Live-Zusammenfassung inhaltich von der nachträglichen Zusammenfassung unterscheidet und ob relevante Informationen im inkrementellen Ansatz verlorgen gehen oder verzerrt dargestellt werden. 
 
+\subsection{Testdaten und Testaufbau}
+Für die Evaluation werden mehrere Meetings mit unterschiedlichem Charakter aufgzeichnet. Die Auswahl der Meetings orientiert sich an realistischen Anwendungszenarien und umfasst unter anderem: 
+-Kurze Tägliche Statusmeetings mit klarer Agenda
+-Technische Runden
+-Meetings mit mehreren aktiven Teilnehmern
 
+Die Dauer der Meetings beträgt jeweils zwischen 15 und 60 Minuten. Alle Meetings werden vollständig transkribiert und sowohl für die Live-Analyse als auch für die nachträgliche Analyse verwendet, um eine direkte Vergleichbarkeit sicherzustellen. 
 
-Testkriterien festlegen welche allgemein gültig sind und immer zurate gezogen werden um vergleichbarkeit herzustellen
+Während des Meetings empfängt der Live-Assistent die Transkripte in periodischen Intervallen und aktualisiert die Zusammenfassung fortlaufend. Nach Beendigung des Meetings wird zusätzlich eine Zusammenfassung auf Basis des vollständigen Transkripts erzeugt. 
 
-Kurzes Meeting halten, mit Agenda. 
-Live zusammenfassung während des meetings + anschließende Zusammenfassung des Kompletten transkripts 
-Vergleich davon, gehen informationen verloren 
-Subjektiv ,
+\subsection{Evaluationskriterien}
+Die Bewertung der Zusammenfassung erfolgt anhand mehrerer Kriterien, die unterschiedliche Aspekte der Qualität abdecken: 
+\begin{itemize}
+    \item Inhaltliche Abdeckung: Inwieweit werden die zentralen Themen, Entscheidungen und Ergebnisse des Meetings erfasst?
+    \item Kohärenz und Verständlichkeit: Ist die Zusammenfassung logsich strukturiert und für Leser nachvollziehbar 
+    \item Informationsverlust: Lassen sich relevante Informationen identifizieren, die in der Live-Zusammenfassung fehlen, jedoch in der nachträglichen Zusammenfassung enthalten sind?
+    \item Redundanz und Drift: Enthält die Live-Zusammenfassung unnötige Wiederholungen oder thematische Verschiebungen im Verlauf des Meetings?
+\end{itemize}
 
-Datensätze mit Meetings, allerdings nicht live sondern Fertige Transkripte
-Eigene Meetings aufnehmen
+\subsection{Automatsiche Meriken}
+Zur objektiven Bewertung der Ähnlichkeit zwischen Live- und nachträglicher Zusammenfassung werden etablierte automatsiche Meriken eingesetzt. Diese dienen als unterstützendes Werkzeug und ersetzen keine qualitative Analyse
+
+\begin{itemize}
+    \item ROUGE-1, ROUGE-2 und ROUGE-L: Diese Metriken messen die Überlappung von Wörtern, Wortpaaren und längsten gemeinsamen Sequenzen zwischen zwei Texten. Sie eigenen sich insbesondere zur Bewertung der inhaltlichen Abdeckung und dienen als klassische Basismetrik für Zusammenfassungsaufgaben. 
+    \item BERTScore: Im Gegensatz zu ROUGE vergleicht BERTScore nicht die exakte Wortüberlappungen, sondern die semantische Ähnlichkeit der Texte auf Basis von Embeddings. Dadurch können auch inhaltlich gleichwertige, aber unterschiedlich formulierte Aussagen erkannt werden. 
+\end{itemize}
+
+Die nachträgliche Zusammenfassung des vollständigen Transkripts wird dabei als Referenztext verwendet, mit dem die finale Live-Zusammenfassung verglichen wird. 
+
+\subsection{Qualitative Analyse}
+Da automatsiche Meriken die inhaltliche Qualität nur eingeschränkt erfassen können, wird die Evaluation durhc eine qualitative Analyse ergänzt. Hierbei werden ausgewählte Meetings manuell untersucht und die beiden Zusammenfassungsvarianten gegenübergestellt. 
+
+Im Rahmen dieser Analyse wird insbesondere betrachtet: 
+\begin{itemize}
+    \item Welche informationen in der Live-Zusammenfassung früher oder später auftauchen 
+    \item Ob bestimmte Themen im Verlauf des Meetings an Bedeutung verlieren oder überbetont werden.
+    \item Wie gut Entscheidungen, Aufgaben oder offene Punkte erkennbar sind. 
+\end{itemize}
+
+Diese qualitative Betrachtung erlaubt es, typische Stärken und Schwächen des inkrementellen Ansatzes zu identifizieren, die durch numerische Metriken allein nicht sichtbar werden. 
+
+\subsection{Grenzen der Evaluation}
+Die Bewertung von Meeting-Zusammenfassungen unterliegt zwangsläufig subjektiven Einflüssen. Selbst bei identischem Transkript können unterschiedliche Zusammenfassungen als gleichermaßen korrekt oder sinnvoll wahrgenommen werden. Darüber hinaus setzen die verwendeten Meriken voraus, dass die nachträgliche Zusammenfassung als sinnvolle Referenz betrachtet werden kann, obwohl auch diese keinen objektiven "Ground Truth"-Text darstellt. 
+
+Die Ergebnisse der Evaluation sind daher primär als vergleichende Analyse zwischen Live- und Batchverarbeitung zu verstehen und nicht als absolute Qualitätsmessung. Dennoch ermöglichen sie eine fundierte Einschätzung der Eignung des entwickelten Systems für den praktischen Einsatz. 

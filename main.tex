@@ -78,6 +78,14 @@ final  %final/ draft		% draft/final entscheidet z.B. ob Bilder drin sind oder nu
     commentstyle=\color{gray}\itshape,    % Gray, italic comments
 }
 
+%JSON-specific style
+\lstdefinestyle{jsonstyle}{
+    basicstyle=\ttfamily\small,
+    stringstyle=\color{blue},
+    breaklines=true,
+    frame=single
+}
+
 % Logfile-specific style
 \lstdefinestyle{logfilestyle}{
     basicstyle=\ttfamily\small,          % Monospace font, slightly larger size
@@ -97,6 +105,19 @@ final  %final/ draft		% draft/final entscheidet z.B. ob Bilder drin sind oder nu
     stringstyle=\color{red}\ttfamily,
     morestring=[b]',
     morestring=[b]",
+}
+%JSON-specific style 
+\lstdefinelanguage{json}{
+basicstyle=\ttfamily\small,
+  numbers=left,
+  numberstyle=\tiny,
+  stepnumber=1,
+  numbersep=5pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  stringstyle=\color{blue},
+  commentstyle=\color{gray}
 }
 
 % TypeScript language definition

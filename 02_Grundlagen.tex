@@ -1,45 +1,84 @@
 \chapter{Grundlagen}
-In diesem Kapitel werden alle notwendigen Hintergrundinfos zum Verständnis der Arbeit gegeben.
+In diesem Kapitel werden alle notwendigen Hintergrundinfos zum Verständnis der Arbeit gegeben.Die beschriebenen Grundlagen schaffen die fachliche Basis, um die nachfolgenden Konzepte, Methoden und Entscheidungen nachvollziehen und einordnen zu können.
 
 \section{Transformer}
-Die Transformer-Architektur wurde 2017 von Vaswani et al. vorgestellt und markiert einen wesentlichen Fortschritt in der Entwicklung neuronaler Netze sowie in der natürlichen Sprachverarbeitung. Ihr zentraler Innovationspunkt liegt im vollständigen Verzicht auf rekurrente und konvolutionale Mechanismen zugunsten eines Selbstaufmerksamkeitsverfahrens (Self-Attention). Dieser Ansatz ermöglicht es, Abhängigkeiten zwischen weit auseinanderliegenden Token effizient zu modellieren und gleichzeitig eine hohe Parallelisierbarkeit der Berechnungen zu gewährleisten. Dadurch übertreffen Transformer-Modelle klassische Ansätze wie rekurrente neuronale Netze (RNNs) oder Convolutional Neural Networks (CNNs) im Hinblick auf Kontextverständnis, Rechenparallelität und Skalierbarkeit. Zudem erweist sich die Architektur als vielseitig einsetzbar und bildet heute die Grundlage nahezu aller großen Sprachmodelle wie BERT, GPT oder T5.
+Die Transformer-Architektur wurde 2017 von Vaswani et al. vorgestellt und stellt einen wichtigen Meilenstein in der Entwicklung moderner neuronaler Netze dar. Insbesondere in der natürlichen Sprachverarbeitung hat sie frühere Ansätze weitgehend abgelöst.
 
-Der ursprüngliche Transformer besteht aus einem Encoder- und einem Decoder-Stack. Der Encoder verarbeitet die Eingabesequenz und erzeugt kontextualisierte Repräsentationen, die anschließend im Decoder genutzt werden, um Ausgabesequenzen wie Übersetzungen oder Vorhersagen zu generieren. Diese klare funktionale Trennung hat zur Entwicklung spezialisierter Modellvarianten geführt. So kommen Encoder-only-Modelle (z. B. BERT) vor allem in Aufgaben der Sprachrepräsentation und Klassifikation zum Einsatz, während Decoder-only-Modelle (z. B. GPT) für autoregressive Textgenerierung optimiert sind. Encoder–Decoder-Modelle (z. B. T5) wiederum eignen sich besonders für Sequenz-zu-Sequenz-Aufgaben.
+Im Gegensatz zu rekurrenten oder konvolutionalen Modellen verzichtet der Transformer vollständig auf sequenzielle Verarbeitungsschritte. Stattdessen basiert die Architektur auf dem Self-Attention-Mechanismus. Dieser bewertet für jedes Token die Relevanz aller anderen Token innerhalb der Sequenz. Dadurch lassen sich sowohl lokale als auch weit entfernte Abhängigkeiten effizient erfassen.
 
-Ein zentrales Element der Architektur ist der Selbstaufmerksamkeitsmechanismus. Er ermöglicht es dem Modell, die Relevanz jedes Tokens im Kontext der gesamten Sequenz einzuschätzen und dadurch sowohl lokale als auch langreichweitige Abhängigkeiten präzise abzubilden. Da alle Tokens gleichzeitig verarbeitet werden, entfallen die sequentiellen Engpässe klassischer RNN- oder LSTM-Modelle. Dies führt nicht nur zu einer erheblichen Steigerung der Effizienz, sondern verbessert auch die Qualität der generierten Repräsentationen und Ausgaben.
+Da alle Token parallel verarbeitet werden, steigt gleichzeitig die Rechenparallelität. Dies führt zu kürzeren Trainingszeiten und einer besseren Skalierbarkeit großer Modelle. In Bezug auf Kontextverständnis, Effizienz und Modellgröße übertreffen Transformer daher klassische Architekturen wie RNNs oder CNNs deutlich. Aus diesem Grund bilden sie heute die Grundlage nahezu aller großen Sprachmodelle, darunter BERT, GPT oder T5.
+
+Ein klassischer Transformer besteht aus zwei Hauptkomponenten: einem Encoder und einem Decoder. Der Encoder verarbeitet die Eingabesequenz und erzeugt kontextualisierte Repräsentationen. Der Decoder nutzt diese Repräsentationen, um schrittweise eine Ausgabesequenz zu generieren, beispielsweise eine Übersetzung oder Zusammenfassung.
+
+Aus dieser funktionalen Trennung haben sich spezialisierte Modellvarianten entwickelt. Encoder-only-Modelle wie BERT werden vor allem für Analyse- und Klassifikationsaufgaben eingesetzt. Decoder-only-Modelle wie GPT eignen sich besonders für die autoregressive Textgenerierung. Encoder-Decoder-Modelle wie T5 kombinieren beide Ansätze und werden typischerweise für Sequenz-zu-Sequenz-Aufgaben verwendet.
+
+\begin{figure}
+\centering
+\includegraphics[height=0.5\textheight]{Bilder/transformer_architecture3.png}
+\caption{Transformerarchitektur in Anlehnung}
+\label{fig:decoder}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=0.5\textheight]{Bilder/decoder_only.png}
+\caption{Decoder-Only Transformer in Anlehnung}
+\label{fig:decoder}
+\end{figure}
+
+Ein Transformer-Modell besteht im Kern aus vier zentralen Komponenten: dem Input Embedding, den Positional Encodings, dem Self-Attention-Mechanismus sowie einem Feed-Forward-Netzwerk. Diese Bausteine bilden gemeinsam die Grundlage für die Verarbeitung der Eingabedaten.
+
+Zu Beginn wird die Eingabesequenz tokenisiert. Dabei zerlegt ein Tokenizer den Text in kleinere Einheiten, etwa Wörter, Subwörter, Satzzeichen oder spezielle Steuersymbole. Diese Token stellen die elementaren Verarbeitungsschritte des Modells dar.
+
+Anschließend werden die Token durch das Input Embedding in numerische Vektoren überführt. Jedes Token erhält dabei eine feste Vektorrepräsentation gleicher Länge. Diese Vektoren dienen als mathematische Grundlage für alle weiteren Berechnungen im Netzwerk. Die konkrete Dimensionalität hängt von der Modellgröße ab und reicht in modernen Architekturen von einigen hundert bis zu mehreren tausend Dimensionen.
+
+Durch diese hochdimensionale Darstellung kann Sprache nicht nur symbolisch, sondern auch geometrisch modelliert werden. Jedes Token entspricht einem Punkt in einem Vektorraum. Semantisch ähnliche Token liegen nahe beieinander, während inhaltlich unterschiedliche Token größere Abstände aufweisen. Auf diese Weise lassen sich Bedeutungsbeziehungen rechnerisch erfassen und weiterverarbeiten. (A Comprehensive Survey on Word Representation Models: From Classical to State-Of-The-Art Word Representation Language Models)
 
 \begin{itemize}
-    \item Imput Embedding
-    \item Positional-Encoding
-    \item Self-Attention-Schicht: Berechnung der Beziehung aller Tokens in einer Sequenz
-    \item Feed-Forward-Schicht: Verarbeitung gewonnener Informationen
-    \item Residualverbindung und Normalisierung: Stabilisierung des Trainings und Verbesserung des Informationsflusses
-    
+    \item \textbf{Imput Embedding}: Umwandlung der Tokens in Vektoren
+    \item \textbf{Positional-Encoding}: Hinzufügen von expliziten Positionsinformationen
+    \item \textbf{Self-Attention-Schicht}: Berechnung der Beziehung aller Tokens in einer Sequenz
+    \item \textbf{Feed-Forward-Schicht}: Verarbeitung gewonnener Informationen
+    \item \textbf{Residualverbindung und Normalisierung}: Stabilisierung des Trainings und Verbesserung des Informationsflusses   
 \end{itemize}
 
-Ein Transformer-Modell setzt sich im Wesentlichen aus vier Komponenten zusammen: dem Input Embedding, den Positional Encodings, dem Selbstaufmerksamkeitsmechanismus sowie einem Feed-Forward-Netzwerk. Im ersten Schritt wird die Eingabesequenz durch einen Tokenizer in Token zerlegt, die beispielsweise Wörter, Subwörter, Satzzeichen oder spezielle Steuersymbole repräsentieren können. Das anschließende Input Embedding überführt jedes dieser Token in einen Vektor fester Länge. Die Dimensionalität dieser Vektoren wird durch die Modellgröße vorgegeben und bildet die Grundlage für alle weiteren Berechnungen im Netzwerk.
+Ein zentrales Element des Transformers ist der Self-Attention-Mechanismus. Er bestimmt für jedes Token, wie relevant alle anderen Token innerhalb derselben Sequenz sind. Auf diese Weise berücksichtigt das Modell den gesamten Kontext gleichzeitig. Dadurch können sowohl lokale Zusammenhänge als auch weit entfernte Abhängigkeiten zuverlässig erfasst werden.
 
-Da ein Transformer keine inhärente Information über die Reihenfolge der Token besitzt, werden Positionsinformationen über sogenannte Positional Encodings ergänzt. Diese werden zu den Embeddings addiert und ermöglichen es dem Modell, sowohl absolute als auch relative Positionen innerhalb der Sequenz zu berücksichtigen. Die resultierende Sequenz aus Vektorrepräsentationen bildet den Eingang in die folgende Verarbeitungsschicht.
+Im Gegensatz zu rekurrenten Architekturen erfolgt die Verarbeitung nicht schrittweise, sondern parallel. Sequentielle Engpässe, wie sie bei RNN- oder LSTM-Modellen auftreten, entfallen vollständig. Dies erhöht die Recheneffizienz deutlich und verbessert zugleich die Qualität der erzeugten Repräsentationen.
 
-Der Decoder – bzw. analog der Encoder – nutzt daraufhin den Selbstaufmerksamkeitsmechanismus, um die Beziehungen zwischen den Token innerhalb der Sequenz zu modellieren. In der Masked Multi-Head Attention, wie sie im Decoder eingesetzt wird, wird für jedes Token berechnet, welchen Einfluss die übrigen Token auf dessen Repräsentation haben. Die Berechnung erfolgt dabei parallel in mehreren „Attention-Heads“, die jeweils eigene Gewichtungsmatrizen verwenden. Dadurch kann das Modell verschiedene Arten von Abhängigkeiten gleichzeitig erfassen, etwa syntaktische Strukturen oder semantische Beziehungen.
+Da der Transformer jedoch keine inhärente Information über die Reihenfolge der Token besitzt, muss die Positionsstruktur explizit ergänzt werden. Zu diesem Zweck werden sogenannte Positional Encodings verwendet. Diese Positionsvektoren werden zu den Embeddings addiert und liefern dem Modell Informationen über absolute und relative Positionen innerhalb der Sequenz. Erst dadurch kann die zeitliche oder syntaktische Abfolge korrekt interpretiert werden. Die so angereicherten Vektoren bilden anschließend die Eingabe für die weiteren Verarbeitungsschichten.
 
-Im Anschluss an die Aufmerksamkeitsschicht werden die resultierenden Vektoren zu einer konsolidierten Repräsentation zusammengeführt und an ein positionseise arbeitendes Feed-Forward-Netzwerk übergeben. Dieses besteht typischerweise aus zwei linearen Transformationen und einer nichtlinearen Aktivierungsfunktion (z. B. ReLU oder GELU). Das Feed-Forward-Netzwerk erweitert die Modellkapazität erheblich, da es die Komplexität erhöht, mit der Muster aus den Daten gelernt werden können, und trägt maßgeblich zur Ausdrucksstärke der gesamten Architektur bei.
+Sowohl Encoder als auch Decoder nutzen anschließend Self-Attention, um Beziehungen zwischen den Token zu modellieren. Im Decoder kommt zusätzlich eine Maskierung zum Einsatz. Dabei wird verhindert, dass zukünftige Token in die Berechnung einfließen, sodass die Generierung autoregressiv erfolgt.
 
-Nachdem alle Schichten des Transformers durchlaufen wurden, gelangt die resultierende Repräsentation in ein abschließendes lineares Ausgabelayer. Dieses Layer projiziert den internen Zustandsvektor auf den gesamten Modellwortschatz und berechnet für jedes bekannte Token die Wahrscheinlichkeit, als nächstes generiert zu werden. Die Anzahl der Ausgabeknoten entspricht somit der Größe des Vokabulars.
+Die Aufmerksamkeit wird nicht nur einmal, sondern parallel in mehreren sogenannten Attention-Heads berechnet. Jeder Head verwendet eigene Gewichtungen und kann unterschiedliche Aspekte des Kontexts erfassen. Dadurch lernt das Modell gleichzeitig verschiedene Arten von Abhängigkeiten, etwa syntaktische Strukturen oder semantische Beziehungen. Die einzelnen Ergebnisse werden anschließend zusammengeführt und weiterverarbeitet.
 
-Mittels einer Softmax-Funktion werden die berechneten Werte in eine normalisierte Wahrscheinlichkeitsverteilung über alle möglichen Folgetoken umgewandelt. Das Token mit der höchsten Wahrscheinlichkeit – oder ein Token, das gemäß einer stochastischen Sampling-Strategie ausgewählt wird – bildet schließlich die nächste Ausgabe des Modells.
+Auf die Aufmerksamkeitsschicht folgt ein Feed-Forward-Netzwerk. Zunächst werden die berechneten Token-Repräsentationen zusammengeführt und anschließend positionsweise weiterverarbeitet. Dabei wird jedes Token unabhängig, aber mit denselben Gewichten transformiert.
 
-Das neu generierte Token wird anschließend an die bisherige Sequenz angehängt und erneut in das Modell eingespeist. Dieser autoregressive Prozess wird so lange wiederholt, bis entweder eine vorgegebene maximale Sequenzlänge erreicht ist oder ein spezielles Stop-Token generiert wird.
+Das Feed-Forward-Netzwerk besteht typischerweise aus zwei linearen Transformationen mit einer dazwischenliegenden nichtlinearen Aktivierungsfunktion, beispielsweise ReLU oder GELU. In der ersten Transformation wird die Dimensionalität der Repräsentation erhöht. Dadurch kann das Modell komplexere Kombinationen von Merkmalen bilden. Die anschließende Aktivierung sorgt dafür, dass bestimmte Informationen verstärkt und andere abgeschwächt werden. So entstehen kontextabhängige, differenzierte Darstellungen.
 
-Neben der Textverarbeitung finden Transformer zunehmend Anwendung in weiteren Bereichen. In der Bildverarbeitung ersetzen Vision Transformer (ViT) klassische Convolutional Neural Networks, indem sie Bildpatches analog zu Tokensequenzen verarbeiten. In der Audioverarbeitung werden Transformer zur automatischen Spracherkennung, zur Klangklassifikation oder zur Sprachsynthese eingesetzt. Ein prominentes Beispiel ist Whisper, ein Transformer-basiertes Modell zur automatischen Spracherkennung (ASR). Obwohl Whispers Architektur ursprünglich aus der NLP-Forschung stammt, demonstriert es eindrucksvoll, dass Transformer universell auf zeitvariante Signale angewendet werden können.
+Durch diesen Schritt erweitert sich die Modellkapazität deutlich. Während die Aufmerksamkeit Beziehungen zwischen Token modelliert, verarbeitet das Feed-Forward-Netzwerk die einzelnen Repräsentationen inhaltlich weiter. Beide Komponenten ergänzen sich und tragen gemeinsam zur Ausdrucksstärke der Architektur bei.
+
+Nachdem alle Encoder- bzw. Decoder-Schichten durchlaufen wurden, wird die finale Repräsentation in ein Ausgabelayer überführt. Dieses projiziert den internen Zustandsvektor auf den gesamten Wortschatz des Modells. Für jedes mögliche Token wird dabei eine Wahrscheinlichkeit berechnet. Die Anzahl der Ausgabewerte entspricht somit der Größe des Vokabulars.
+
+Eine Softmax-Funktion wandelt diese Werte anschließend in eine normalisierte Wahrscheinlichkeitsverteilung um. Auf dieser avoiding Basis wird das nächste Token ausgewählt. Häufig kommt dabei kein rein deterministisches Verfahren zum Einsatz, sondern eine Sampling-Strategie. Über den sogenannten Temperature-Parameter lässt sich steuern, wie stark wahrscheinliche Token bevorzugt werden. Niedrige Werte führen zu stabilen, reproduzierbaren Ausgaben, während höhere Werte vielfältigere und kreativere Ergebnisse ermöglichen.
+
+Das gewählte Token wird an die bestehende Sequenz angehängt und erneut als Eingabe verwendet. Dieser autoregressive Prozess wiederholt sich Schritt für Schritt, bis eine maximale Länge erreicht oder ein spezielles Stop-Token erzeugt wird.
+
+Transformer-Modelle werden inzwischen nicht nur für Text eingesetzt. Auch in anderen Modalitäten hat sich die Architektur etabliert. Vision Transformer verarbeiten Bilder als Sequenzen von Bildpatches und ersetzen damit klassische Convolutional Neural Networks. In der Audioverarbeitung kommen Transformer unter anderem für automatische Spracherkennung oder Sprachsynthese zum Einsatz. Ein bekanntes Beispiel ist Whisper, das zeigt, dass sich das Prinzip der Self-Attention ebenso effektiv auf zeitabhängige Signale anwenden lässt.
 
 
 \section{Speech-to-Text}
-Speech-to-Text (STT), auch als Automatic Speech Recognition (ASR) bezeichnet, umfasst alle rechnergestützten Verfahren zur automatisierten Umwandlung gesprochener Sprache in schriftliche Form. Ziel dieser Systeme ist es, das akustische Sprachsignal zuverlässig zu erfassen, linguistisch zu interpretieren und in eine korrekte Textrepräsentation zu überführen. Moderne STT-Systeme kommen in zahlreichen Anwendungsbereichen zum Einsatz, etwa in Assistenzsystemen, Untertitelung, Barrierefreiheit, Dokumentationsprozessen oder der multimodalen Mensch-Maschine-Interaktion.
+Speech-to-Text (STT), auch als Automatic Speech Recognition (ASR) bezeichnet, beschreibt Verfahren zur automatischen Umwandlung gesprochener Sprache in Text. Ziel ist es, ein akustisches Signal so zu verarbeiten, dass daraus eine korrekte schriftliche Repräsentation entsteht. Das System muss dabei Sprache erkennen, linguistisch interpretieren und in verständlichen Text überführen.
 
-Die Entwicklung der Spracherkennung begann in den 1950er-Jahren mit regelbasierten Ansätzen zur Erkennung isolierter Wörter. Mit dem Aufkommen probabilistischer Verfahren – insbesondere Hidden Markov Models (HMM) – etablierte sich ab den 1970er-Jahren ein Standardansatz zur Modellierung zeitlicher Abhängigkeiten in Sprachsignalen (Rabiner, 1989). Ab etwa 2010 führte der Einsatz von Deep Learning und End-to-End-Modellen, insbesondere CTC-basierten und später Transformer-basierten Architekturen, zu erheblichen Leistungssteigerungen (Hinton et al., 2012; Graves et al., 2006). Seit der Veröffentlichung großer multilingualer Foundation-Modelle wie wav2vec 2.0 (Baevski et al., 2020) oder Whisper (Radford et al., 2022) dominieren zunehmend generalisierbare, robust trainierte Systeme das Feld.
+Solche Technologien finden heute in vielen Bereichen Anwendung. Dazu zählen digitale Assistenzsysteme, barrierefreie Zugänge, automatische Dokumentation von Gesprächen sowie allgemein die Interaktion zwischen Mensch und Maschine. Insbesondere überall dort, wo gesprochene Informationen effizient weiterverarbeitet oder gespeichert werden sollen, spielt STT eine zentrale Rolle.
 
-Moderne STT-Systeme basieren überwiegend auf Deep-Learning-Architekturen, die akustische Merkmalsrepräsentationen – meist in Form von Mel-Spektrogrammen – verarbeiten. Dabei lassen sich zwei grundlegende Schritte unterscheiden:
+Die Entwicklung der Spracherkennung reicht mehrere Jahrzehnte zurück. Erste Systeme arbeiteten regelbasiert und konnten lediglich einzelne, isolierte Wörter erkennen. Später etablierten sich probabilistische Verfahren, insbesondere Hidden-Markov-Modelle, die zeitliche Abhängigkeiten im Sprachsignal besser abbilden konnten. Über viele Jahre galten sie als Standardansatz.
+
+Einen deutlichen Fortschritt brachte schließlich der Einsatz von Deep Learning. End-to-End-Modelle ersetzten schrittweise komplexe Pipeline-Systeme und lernten die Abbildung von Audio zu Text direkt aus Daten. Zunächst kamen CTC-basierte Architekturen zum Einsatz, später zunehmend Transformer-Modelle, die längere Kontexte effizient verarbeiten können.
+
+Aktuelle Foundation-Modelle wie wav2vec 2.0 oder Whisper gehen noch einen Schritt weiter. Sie werden auf sehr großen, multilingualen Datensätzen trainiert und zeigen dadurch eine hohe Robustheit gegenüber unterschiedlichen Sprechern, Akzenten und Aufnahmebedingungen. Solche generalisierbaren Modelle prägen heute den Stand der Technik in der automatischen Spracherkennung.
+Speech-to-Text (STT), auch als Automatic Speech Recognition (ASR) bezeichnet, umfasst alle rechnergestützten Verfahren zur automatisierten Umwandlung gesprochener Sprache in schriftliche Form. Ziel dieser Systeme ist es, das akustische Sprachsignal zuverlässig zu erfassen, linguistisch zu interpretieren und in eine korrekte Textrepräsentation zu überführen. Moderne STT-Systeme kommen in zahlreichen Anwendungsbereichen zum Einsatz, etwa in Assistenzsystemen, Barrierefreiheit, Dokumentationsprozessen oder der multimodalen Mensch-Maschine-Interaktion.
+
 
 \begin{itemize}
     \item Das kontinuierliche Audiosignal wird segmentiert und in ein Log-Mel-Spektrogramm überführt, das die zeit-frequenzbasierte Struktur des Sprachsignals abbildet.
@@ -47,44 +86,72 @@ Moderne STT-Systeme basieren überwiegend auf Deep-Learning-Architekturen, die a
     \item Sequenzmodellierung und Dekodierung:Ein neuronales Modell erzeugt aus diesen Merkmalen eine Token-Sequenz, die anschließend zu Text zusammengesetzt wird. Moderne Modelle nutzen hierfür Transformer-Architekturen, da diese besonders gut mit langen Kontexten und sequentiellen Abhängigkeiten umgehen können (Vaswani et al., 2017).
 \end{itemize}
 
-Ein aktueller Vertreter moderner STT-Systeme ist Whisper, das 2022 von OpenAI veröffentlicht wurde (Radford et al., 2022). Whisper ist ein Encoder-Decoder-Transformer, dessen Architektur ursprünglich aus der maschinellen Übersetzung stammt, jedoch für Audio- statt Texteingaben angepasst wurde.
+Ein aktuelles Beispiel für moderne Speech-to-Text-Systeme ist Whisper, das 2022 von OpenAI veröffentlicht wurde. Das Modell basiert auf einer Encoder-Decoder-Transformer-Architektur. Diese Struktur stammt ursprünglich aus der maschinellen Übersetzung, wurde jedoch für die Verarbeitung von Audiosignalen angepasst. Statt Textsequenzen erhält das Modell akustische Merkmale als Eingabe.
 
-\begin{itemize}
-    \item Encoder: Der Encoder verarbeitet 30-Sekunden-Chunks eines Log-Mel-Spektrogramms und überführt diese in eine latente Repräsentation des Audios. Damit fungiert er als akustisches Modell, das sprachliche Merkmale abstrahiert und relevante Informationen extrahiert.
-    \item Decoder: Der Decoder generiert auf Grundlage der Encoder-Repräsentation Text-Tokens. Die Arbeitsweise ähnelt einem Sprachmodell, wobei der Decoder zusätzlich akustische Kontextinformationen berücksichtigt.
-\end{itemize}
+Der Encoder übernimmt dabei die Verarbeitung des Sprachsignals. Dazu wird das Audio zunächst in ein Log-Mel-Spektrogramm umgewandelt und in feste Zeitabschnitte von etwa 30 Sekunden unterteilt. Diese Repräsentation wird anschließend durch mehrere Transformer-Schichten verarbeitet. Mithilfe von Self-Attention erfasst der Encoder zeitliche Abhängigkeiten im Signal und verdichtet akustische Informationen, etwa Phoneme oder Lautübergänge, schrittweise zu einer kompakten, kontextsensitiven Darstellung. Diese latente Repräsentation bildet die Grundlage für die spätere Texterzeugung.
 
-Whisper wurde auf rund 680.000 Stunden multilingualer, teils schwach annotierter Audiodaten trainiert – eine Größenordnung, die im Bereich der ASR außergewöhnlich hoch ist (Radford et al., 2022). Durch diese heterogene Datensammlung zeichnet sich das Modell durch hohe Robustheit gegenüber Akzenten, verschiedenen Aufnahmebedingungen und Hintergrundgeräuschen aus.
-
-Das Modell wird in verschiedenen Größen (tiny bis large) bereitgestellt, was unterschiedliche Anforderungen hinsichtlich Genauigkeit und Rechenaufwand ermöglicht. Die größte Variante erreicht in vielen Sprachen nahezu menschliche Genauigkeiten in der Transkription.
-
-Da Whisper ein Foundation-Modell ist, lässt es sich durch Finetuning an spezifische Anwendungsfälle anpassen. Beim Finetuning wird das vortrainierte Modell auf eine kleinere, domänenspezifische Datenbasis weitertrainiert, um Besonderheiten eines Fachbereichs, einer Sprache, eines Dialekts oder einer spezifischen Akustik zu berücksichtigen (Prabhavalkar et al., 2023).
-
-Im Rahmen des Masterprojekts (Verweis auf eigenen Projektrahmen) wurde Whisper – bzw. eine optimierte Implementierung wie Faster-Whisper – auf einem spezifischen Datensatz weitertrainiert. Dieser Prozess umfasst typischerweise:
-
-\begin{itemize}
-    \item Vorbereitung und Normalisierung eines transkribierten Audio-Text-Korpus
-    \item Umwandlung der Audiodaten in Whisper-kompatible Mel-Spektogramme
-    \item Training des Modells mit reduzierter Lernrate 
-    \item Evaluation auf Validierungsdaten und ggf. Anpassung der Hyperparameter
-\end{itemize}
-
-Faster-Whisper basiert architektonisch vollständig auf Whisper, verwendet jedoch eine optimierte Inferenz-Engine (z. B. CTranslate2), wodurch die Transkriptionsgeschwindigkeit erheblich erhöht wird, ohne Änderungen am zugrundeliegenden Modell vorzunehmen.
-
-\section{Large-Language-Model}
-Large Language Models (LLMs) sind tiefenlernende neuronale Netze, die auf umfangreichen Sammlungen natürlicher Sprachdaten trainiert werden, um sowohl sprachliches Verständnis als auch generative Fähigkeiten zu entwickeln. Im Gegensatz zu älteren, stärker auf spezifische Aufgaben zugeschnittenen NLP-Modellen entstehen durch das Training auf breit gefächerten Textkorpora allgemeine, domänenübergreifende Sprachfertigkeiten. Daher werden moderne LLMs häufig als Foundation Models bezeichnet, da sie eine vielseitige Grundlage für eine Vielzahl nachgelagerter Anwendungen bieten (Zhao et al., 2023; Minaee et al., 2024).
-
-Technologisch basieren die meisten heutigen LLMs auf der Transformer-Architektur, die durch Mechanismen wie Self-Attention eine effiziente Verarbeitung langer Textsequenzen ermöglicht und damit die zuvor gängigen rekurrenten Modelle weitgehend abgelöst hat. Ein charakteristisches Merkmal von LLMs ist ihre enorme Größe: Sie umfassen häufig Milliarden von Parametern und werden auf Datensätzen im Größenbereich vieler hundert Gigabyte bis hin zu mehreren Terabyte trainiert. Empirische Scaling Laws zeigen, dass mit wachsenden Modellparametern, größeren Datensätzen und höherer Rechenleistung systematisch Leistungssteigerungen erzielt werden können (Zhao et al., 2023).
-
-Der Trainingsprozess moderner LLMs erfolgt in zwei Schritten. Zunächst werden die Modelle im Pre-Training mittels selbstüberwachtem Lernen trainiert. Typische Lernziele sind das Vorhersagen des nächsten Tokens oder das Auffüllen maskierter Textteile. Dieser Prozess führt zu einer breit angelegten, generalistischen Sprachkompetenz. Darauf aufbauend folgt das Fine-Tuning, bei dem ein vortrainiertes Modell durch überwachtes Lernen auf spezifische Aufgaben oder Daten angepasst wird. Fine-Tuning kann das gesamte neuronale Netz betreffen, jedoch haben sich in den letzten Jahren auch parameter-effiziente Methoden wie LoRA (Low-Rank Adaptation) etabliert. Bei LoRA werden nur kleine, trainierbare Zusatzmatrizen ergänzt, während der Großteil der ursprünglichen Modellparameter eingefroren bleibt. Dies reduziert den Rechenaufwand erheblich und ermöglicht die Anpassung großer Modelle auf vergleichsweise kleinen Datensätzen.
-
-Ein weiteres Schlüsselmerkmal aktueller LLMs ist ihre Fähigkeit zu In-Context Learning. Das Modell nutzt dabei allein auf Basis der im Prompt bereitgestellten Beispiele oder Instruktionen neue Aufgabenstrukturen, ohne dass Parameteränderungen notwendig sind. Damit entsteht eine bemerkenswerte Flexibilität: Das Modell kann Aufgaben lösen, für die es nie explizit trainiert wurde, sofern die Aufgabenbeschreibung im Kontext ausreichend präzise ist.
-
-Die Entwicklung von LLMs markiert einen Paradigmenwechsel in der Sprachverarbeitung. Während klassische Sprachmodelle primär die Wahrscheinlichkeit des nächsten Tokens schätzten, generieren heutige Modelle konsistente, kontextbezogene Texte, beantworten Fragen, strukturieren Inhalte und zeigen zunehmend komplexes reasoning-ähnliches Verhalten. Dadurch verschiebt sich der Fokus von reiner Sprachmodellierung hin zu einer generativen, vielseitig einsetzbaren Sprachintelligenz (Minaee et al., 2024).
+Der Decoder generiert darauf aufbauend die Transkription Token für Token. Dabei nutzt er zwei Informationsquellen: Über Cross-Attention greift er auf die Encoder-Ausgabe zu, während Self-Attention den bereits erzeugten Textkontext berücksichtigt. In jedem Schritt wird probabilistisch das nächste Token ausgewählt. Die Funktionsweise ähnelt damit einem klassischen Sprachmodell, wird jedoch zusätzlich durch akustische Kontextinformationen gesteuert. Auf diese Weise verbindet Whisper Sprachverständnis mit Textgenerierung in einem durchgängigen End-to-End-Prozess.
 
 
-\section{NLP mit Hilfe von KI}
-Bei der verarbeitung von Sprache und Text mithilfe von KI gibt es verschiedene Methoden. Zum verständnis dieser Arbeit werden nicht alle gezeigt. 
+\begin{figure}
+\centering
+\includegraphics[height=0.5\textheight]{Bilder/whisper_architecturepng.png}
+\caption{Whisper Architektur in Anlehnung an OpenAI}
+\end{figure}
+
+Whisper wurde auf rund 680.000 Stunden multilingualer Audiodaten trainiert. Ein Teil dieser Daten ist nur schwach oder automatisch annotiert. Für den Bereich der automatischen Spracherkennung stellt diese Datenmenge eine außergewöhnlich große Trainingsbasis dar.
+
+Der Datensatz umfasst sehr unterschiedliche Quellen, darunter Web-Audio, Podcasts, Vorträge, Interviews und Videos. Viele der zugehörigen Transkripte sind unvollständig oder nur teilweise zuverlässig. Durch diese heterogene Zusammensstellung lernt das Modell, mit realistischen Störungen umzugehen. Es zeigt daher eine hohe Robustheit gegenüber Akzenten, variierenden Aufnahmebedingungen und Hintergrundgeräuschen.
+
+Die Sprachverteilung ist jedoch unausgeglichen. Etwa ein Drittel der Trainingsdaten entfällt auf Englisch, während für viele kleinere Sprachen deutlich weniger Material zur Verfügung steht. Entsprechend variiert die Transkriptionsqualität je nach Sprache teilweise deutlich.
+
+Whisper wird zudem in mehreren Modellgrößen von tiny bis large bereitgestellt. Diese Varianten unterscheiden sich in der Anzahl der trainierbaren Parameter sowie in Tiefe und Breite der Transformer-Architektur. Größere Modelle erzielen in der Regel höhere Genauigkeiten, benötigen jedoch mehr Rechenressourcen und weisen längere Inferenzzeiten auf. Anwender müssen daher einen Kompromiss zwischen Qualität und Geschwindigkeit wählen.
+
+Als sogenanntes Foundation-Modell lässt sich Whisper darüber hinaus an spezifische Anwendungsfälle anpassen. Beim Fine-Tuning wird das vortrainierte Modell mit einer kleineren, domänenspezifischen Datenbasis weitertrainiert. Dadurch können Besonderheiten wie Fachvokabular, Dialekte oder spezielle akustische Bedingungen gezielt berücksichtigt werden.
+
+Im Rahmen dieser Arbeit wurde Whisper – beziehungsweise eine optimierte Implementierung wie Faster-Whisper – auf einem projektspezifischen Datensatz weitertrainiert. Der typische Ablauf dieses Prozesses umfasst folgende Schritte:
+
+\begin{enumerate}
+    \item \textbf{Vorbereitung und Normalisierung eines transkribierten Audio-Text-Korpus} 
+
+    Der Korpus besteht aus Audiodateien mit zugehörigen Texttranskripten. In diesem Schritt werden Audio und Text zeitlich und inhaltlich abgeglichen, fehlerhafte oder unvollständige Beispiele entfernt sowie die Transkripte vereinheitlicht, etwa durch Normalisierung von Groß- und Kleinschreibung, Zahlenformaten oder Sonderzeichen.
+    
+    \item \textbf{Umwandlung der Audiodaten in Whsiper-kompatible Mel-Spektrogramme}
+
+    Die Audiosignale werden segmentiert, resampled und in Log-Mel-Spektrogramme überführt, welche als standardisierte akustische Eingaberepräsentation für den Whisper-Encoder dienen.
+
+    \item \textbf{Training des Modells mit reduzierter Lernrate} 
+    
+    Das vortrainierte Whisper-Modell wird mittels Fine-Tuning an den neuen Datensatz angepasst. Eine reduzierte Lernrate stellt sicher, dass die bereits gelernten allgemeinen Sprach- und Akustikmerkmale erhalten bleiben und lediglich domänespezifische Anpassung erfolgt.
+    
+    \item \textbf{Evaluation auf Validierungsdaten und ggf. Anpassund der Hyperparamter}
+    Die Modellleistung wird regelmäßig auf einem separaten Validierungsdatensatz überprüft, um Überanpassung zu erkennen und bei Bedarf Hyperparameter wie Lernrate oder Batch-Größe anzupassen.
+\end{enumerate}
+
+Faster-Whisper basiert architektonisch unverändert auf dem ursprünglichen Whisper-Modell. Die zugrunde liegende Netzwerkstruktur sowie die trainierten Gewichte bleiben vollständig erhalten. Stattdessen wird die Ausführung der Inferenz optimiert.
+
+Hierfür kommt eine spezialisierte Inferenz-Engine, beispielsweise CTranslate2, zum Einsatz. Diese ermöglicht eine effizientere Nutzung der Hardware und reduziert die Rechenzeit deutlich. Dadurch steigt die Transkriptionsgeschwindigkeit erheblich, ohne dass Anpassungen am eigentlichen Modell oder zusätzliche Trainingsschritte erforderlich sind.
+
+
+\section{Large-Language-Model (LLM)}
+Large Language Models (LLMs) sind neuronale Netze, die mithilfe von Deep Learning auf sehr großen Textsammlungen trainiert werden. Ihr Ziel ist es, Sprache zu verstehen und selbstständig neue Texte zu generieren. Im Gegensatz zu klassischen NLP-Modellen, die meist auf einzelne Aufgaben spezialisiert sind, entwickeln LLMs durch das Training auf breit gefächerten Daten eine allgemeine, domänenübergreifende Sprachkompetenz.
+
+Dadurch lassen sie sich flexibel für unterschiedliche Anwendungen einsetzen, etwa für Textgenerierung, Zusammenfassungen oder Frage-Antwort-Systeme. Aus diesem Grund werden sie häufig als sogenannte Foundation Models bezeichnet, da sie als Grundlage für viele nachgelagerte Aufgaben dienen.
+
+Technisch basieren die meisten heutigen LLMs auf der Transformer-Architektur. Insbesondere der Self-Attention-Mechanismus ermöglicht es, lange Textsequenzen effizient zu verarbeiten und Abhängigkeiten über große Distanzen hinweg zu modellieren. Frühere rekurrente Modelle wurden dadurch weitgehend abgelöst.
+
+Ein charakteristisches Merkmal moderner LLMs ist ihre Größe. Aktuelle Modelle umfassen häufig Milliarden von Parametern und werden auf Datensätzen im Umfang von mehreren hundert Gigabyte bis hin zu Terabytes trainiert. Empirische Untersuchungen zeigen, dass mit steigender Modellgröße, mehr Trainingsdaten und höherer Rechenleistung die Leistungsfähigkeit systematisch zunimmt. Diese Zusammenhänge werden als Scaling Laws bezeichnet.
+
+Das Training erfolgt typischerweise in zwei Phasen. Zunächst findet ein selbstüberwachtes Pre-Training statt. Dabei lernt das Modell allgemeine Sprachstrukturen, etwa durch die Vorhersage des nächsten Tokens oder das Ergänzen maskierter Textstellen. Dieser Schritt vermittelt eine breite, generalistische Sprachkompetenz.
+
+Anschließend kann ein Fine-Tuning erfolgen, bei dem das vortrainierte Modell auf konkrete Aufgaben oder Domänen angepasst wird. Neben klassischem Fine-Tuning, bei dem alle Parameter aktualisiert werden, haben sich auch parameter-effiziente Verfahren etabliert. Ein Beispiel ist LoRA (Low-Rank Adaptation). Hier werden nur kleine Zusatzmodule trainiert, während der Großteil der ursprünglichen Gewichte unverändert bleibt. Dadurch sinken Speicherbedarf und Rechenaufwand erheblich, ohne die Anpassungsfähigkeit stark einzuschränken.
+
+Ein weiteres zentrales Merkmal ist das sogenannte In-Context Learning. Dabei kann das Modell neue Aufgaben allein anhand von Beispielen oder Instruktionen im Prompt bearbeiten. Die Parameter bleiben unverändert; die Aufgabenbeschreibung wird ausschließlich über den Eingabekontext vermittelt. Auf diese Weise lassen sich viele Probleme flexibel lösen, ohne ein zusätzliches Training durchführen zu müssen.
+
+Insgesamt markieren LLMs einen grundlegenden Wandel in der Sprachverarbeitung. Während klassische Sprachmodelle vor allem Wahrscheinlichkeiten für einzelne Tokens berechneten, erzeugen moderne Systeme zusammenhängende, kontextbezogene Texte. Sie strukturieren Informationen, beantworten Fragen und übernehmen komplexe sprachliche Aufgaben. Der Schwerpunkt verschiebt sich damit von reiner Sprachmodellierung hin zu vielseitig einsetzbaren, generativen Sprachsystemen.
+
+\section{Natural Language Processing (NLP) mit Hilfe von KI}
+Bei der Verarbeitung von Sprache und Text mithilfe von KI gibt es verschiedene Methoden. Zum Verständnis dieser Arbeit werden nicht alle gezeigt. 
 Extractive und abstractive Summary 
 
 \subsection{Segmentation}
@@ -94,19 +161,19 @@ Um dieses Problem zu vermeiden, wird der Text in logisch und semantisch sinnvoll
 
 Grundsätzlich lassen sich zwei Hauptansätze der Segmentierung unterscheiden: Fixed Size Segmentation und Semantic Segmentation.
 
-Bei der Fixed Size Segmentation wird der Text nach einer festgelegten Tokenzahl oder Wortlänge aufgeteilt. Dieses Verfahren ist einfach umzusetzen und rechnerisch effizient, ignoriert jedoch den semantischen Zusammenhang im Text. Dadurch kann es vorkommen, dass ein Segment mitten in einem Satz, Argument oder Kapitel endet – was die inhaltliche Kohärenz stört.
+Bei der Fixed Size Segmentation wird der Text nach einer festgelegten Tokenzahl oder Wortlänge aufgeteilt. Dieses Verfahren ist einfach umzusetzen und rechnerisch effizient, ignoriert jedoch den semantischen Zusammenhang im Text. Dadurch kann es vorkommen, dass ein Segment mitten in einem Satz, Argument oder Kapitel endet, was die inhaltliche Kohärenz stört.
 
 Die Semantic Segmentation verfolgt einen anspruchsvolleren, inhaltlich orientierten Ansatz. Hierbei werden die inhaltlichen Grenzen des Textes erkannt und als Segmentierungsstellen genutzt. Häufig erfolgt dies mithilfe von Text-Embeddings und Clustering-Verfahren.
 Ein Embedding ist eine numerische Repräsentation von Wörtern oder Textpassagen in einem Vektorraum. Wörter oder Sätze mit ähnlicher Bedeutung liegen in diesem Raum näher beieinander, während thematisch unterschiedliche Inhalte größere Abstände aufweisen. Diese Eigenschaft lässt sich gezielt nutzen, um semantische Übergänge zu erkennen:
 
-Durch Clustering – also das Zusammenfassen ähnlicher Embeddings – können inhaltlich zusammenhängende Textstellen gruppiert werden. Die Übergänge zwischen diesen Clustern markieren dann die inhaltlichen Grenzen des Textes. Auf diese Weise entstehen semantisch homogene Segmente, die sich deutlich von rein mechanisch geschnittenen Textteilen unterscheiden.
+Durch Clustering, also das Zusammenfassen ähnlicher Embeddings, können inhaltlich zusammenhängende Textstellen gruppiert werden. Die Übergänge zwischen diesen Clustern markieren dann die inhaltlichen Grenzen des Textes. Auf diese Weise entstehen semantisch homogene Segmente, die sich deutlich von rein mechanisch geschnittenen Textteilen unterscheiden.
 
 Ein Hybridansatz kombiniert schließlich beide Methoden: Zunächst wird der Text in technisch handhabbare Einheiten fester Größe geteilt, um Rechenaufwand zu begrenzen. Innerhalb dieser Abschnitte erfolgt anschließend eine feinere, semantisch fundierte Segmentierung. Dieses Verfahren vereint die Effizienz der festen Aufteilung mit der inhaltlichen Präzision der semantischen Methode und ist damit besonders geeignet für komplexe Anwendungen – etwa bei der Verarbeitung langer Transkripte oder wissenschaftlicher Texte, die von großen Sprachmodellen analysiert oder zusammengefasst werden sollen.
 
 \subsection{Kontextualisierung}
 Kontextualisierung bezeichnet die Fähigkeit großer Sprachmodelle (LLMs), den Sinn eines Textes im größeren Zusammenhang zu erfassen und diesen Gesamtzusammenhang aktiv in die Verarbeitung einzubeziehen. Dabei wird nicht nur die Bedeutung einzelner Wörter oder Sätze analysiert, sondern deren Beziehung innerhalb des gesamten Textes berücksichtigt. Durch diesen Prozess kann das Modell die Wichtigkeit einzelner Bereiche erkennen und hervorheben, was zu einer inhaltlich kohärenten, faktentreuen und qualitativ hochwertigen Verarbeitung führt.
 
-Die gezielte Nutzung von Kontext ist insbesondere bei langen Dokumenten entscheidend, um die Kohärenz und Faktentreue von Zusammenfassungen oder generierten Texten sicherzustellen. Studien wie On Context Utilization in Summarization with Large Language Models (Ravaut et al., 2024) zeigen, dass LLMs bei langen Eingaben häufig nur Teile des Inputs effektiv nutzen — insbesondere den Anfang und das Ende eines Textes. Inhalte in der Mitte werden hingegen oft unterrepräsentiert, was als Positionsbias bezeichnet wird. Dadurch können wesentliche Informationen verloren gehen, und wichtige Querbezüge, zeitliche Abhängigkeiten oder logische Implikationen bleiben unberücksichtigt.
+Die gezielte Nutzung von Kontext ist insbesondere bei langen Dokumenten entscheidend, um die Kohärenz und Faktentreue von Zusammenfassungen oder generierten Texten sicherzustellen. Studien wie On Context Utilization in Summarization with Large Language Models (Ravaut et al., 2024) zeigen, dass LLMs bei langen Eingaben häufig nur Teile des Inputs effektiv nutzen, insbesondere den Anfang und das Ende eines Textes. Inhalte in der Mitte werden hingegen oft unterrepräsentiert, was als Positionsbias bezeichnet wird. Dadurch können wesentliche Informationen verloren gehen, und wichtige Querbezüge, zeitliche Abhängigkeiten oder logische Implikationen bleiben unberücksichtigt.
 
 Gerade in der Speech-to-Text-Verarbeitung spielt Kontextualisierung eine zentrale Rolle. Transkripte gesprochener Sprache sind geprägt von Sprecherwechseln, Themenwechseln und referenziellen Sprüngen, die nur mit ausreichender Kontextbetrachtung korrekt verstanden und zusammengefasst werden können. Ohne eine solche Kontextintegration verliert die Modellverarbeitung an inhaltlicher Tiefe und Genauigkeit.
 
@@ -129,9 +196,6 @@ Die Rolling Summary bietet eine Reihe von Vorteilen. Besonders hervorzuheben sin
 
 Gleichzeitig bringt die Methode auch Herausforderungen mit sich. Durch die wiederholte Verdichtung besteht ein Risiko, dass Informationen verloren gehen oder wichtige Details in frühen Stufen eliminiert werden. Ebenso kann es zu einer sogenannten Bias-Kaskade kommen: Fehler oder Gewichtungen auf tieferen Ebenen setzen sich nach oben fort und beeinflussen so die spätere Gesamtsummary. Darüber hinaus verlangt das Verfahren eine sorgfältige Balancierung zwischen Kompressionsstärke und Informationsgehalt. Wird jeder Chunk zu stark verdichtet, entsteht eine oberflächliche Gesamtsummary; wird zu wenig verdichtet, wächst die Summary übermäßig und verliert ihren Zweck. Auch die Wahl der Chunk-Größe spielt eine entscheidende Rolle: Kürzere Chunks erhöhen die Aktualität und eignen sich gut für Echtzeitanwendungen, enthalten jedoch weniger kontextuelle Information; längere Chunks erhöhen die Dichte der Informationen, gehen aber zulasten der Reaktionszeit.
 
-https://factory.ai/news/compressing-context
-
-
 \section{Prompt Engineering}
 Prompt Engineering bezeichnet das gezielte Gestalten von Eingabeaufforderungen („Prompts“) für LLMs, um gewünschte Ausgaben zu erzeugen, ohne die Modellparameter selbst zu verändern (Sahoo et al., 2024). Prompts können in unterschiedlichen Formen auftreten – etwa als natürlichsprachliche Anweisungen, als Input-Output-Beispiele oder als sogenannte „Soft Prompts“ in Vektor­repräsentation (Chen et al., 2023). Ziel ist es, bereits vortrainierte Modelle durch geeignete Eingabe­gestaltung auf spezifische Aufgaben anzuwenden, wodurch umfangreiches Feintuning entfällt oder reduziert werden kann. So lässt sich die vorhandene Kapazität des Modells effizienter nutzen.
 
@@ -144,6 +208,7 @@ In der Praxis unterscheidet man verschiedene Arten von Prompts:
 
 Zu den gängigen Strategien zählen Zero-Shot Prompting, bei dem das Modell nur eine Aufgabenbeschreibung erhält, Few-Shot Prompting mit wenigen Beispielpaaren zur Orientierung, sowie Chain-of-Thought (CoT) Prompting, das das Modell zu einer schrittweisen Herleitung seiner Antwort anregt (Schulhoff et al., 2024).
 
-Die Qualität eines Prompts hängt wesentlich von Formulierung, Klarheit, Kontext und Beispielwahl ab – schon kleine Änderungen können zu deutlich unterschiedlichen Ergebnissen führen (Schulhoff et al., 2024). Zudem sind Prompts stark modellspezifisch: Ein erfolgreicher Prompt für Modell A liefert nicht zwingend gute Resultate bei Modell B. Die Bewertung guter Prompts bleibt schwierig, da es bislang keine standardisierten Metriken gibt und qualitative Urteile oft subjektiv ausfallen (Sahoo et al., 2024). Darüber hinaus gilt: Mehr Beispiele oder längere Kontexte führen nicht zwangsläufig zu besseren Ergebnissen; zu viele Informationen können den Output sogar verschlechtern (Overtransfer-Effekte).
+Die Qualität eines Prompts hängt wesentlich von Formulierung, Klarheit, Kontext und Beispielwahl ab. Schon kleine Änderungen können zu deutlich unterschiedlichen Ergebnissen führen (Schulhoff et al., 2024). Zudem sind Prompts stark modellspezifisch: Ein erfolgreicher Prompt für Modell A liefert nicht zwingend gute Resultate bei Modell B. Die Bewertung guter Prompts bleibt schwierig, da es bislang keine standardisierten Metriken gibt und qualitative Urteile oft subjektiv ausfallen (Sahoo et al., 2024). Darüber hinaus gilt: Mehr Beispiele oder längere Kontexte führen nicht zwangsläufig zu besseren Ergebnissen; zu viele Informationen können den Output sogar verschlechtern (Overtransfer-Effekte).
 
 
+% Ich finde den Stil ab 2.4 etwas besser als davor, diese Teile lesen sich deutlich besser --> vielleicht nochmal die vorherigen Teile etwas anpassen sodass Stil und Detailtiefe im gesamten Grundlagen Teil gleich sind (ChatGPT hilft bestimmt gerne dabei xD)

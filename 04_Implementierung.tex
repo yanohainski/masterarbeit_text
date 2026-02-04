@@ -2,51 +2,222 @@
 \label{sec:implementierung}
 In diesem Kapitel wird die Umsetzung der geplanten Softwarearchitektur im Detail beschrieben. Der Fokus liegt dabei auf der Backend-Implementierung, während das Frontend nur oberflächlich betrachtet wird, dessen Hauptfunktion im Anzeigen und Bedienen der Applikation besteht. 
 
-Im folgenden wird zunächst die Gesamtarchitektur betrachtet, wobei Besonderheiten der Implementierung sowie die Nutzung von Django hervorgehoben werden. Anschließend wird die eigens entwickelte Django App \textit{Voice} vorgestellt, in der die Geschäftslogik implementiert ist. Zuletzt wird auf den Aufbau des eigentlichen LLM-Agenten eingegangen.
+Im folgenden wird zunächst die Gesamtarchitektur betrachtet, wobei Besonderheiten der Implementierung sowie die Nutzung von Django hervorgehoben werden. Anschließend wird die eigens entwickelte Django App \textit{Voice} vorgestellt, in der die Geschäftslogik implementiert ist.
 
 \section{Nachweis der Machbarkeit (Proof of Concept)}
-Zeigen des ersten Prototypen welcher Mit jupyter Notebook entstanden ist
-Probleme die sich ergeben haben (Threading) 
-Als erstes wurde das Grundkonzept mit einem schnellen Jupyter Notebook in Python aufgebaut. Dazu mithilfe von Skripten Audiodateien erstellt, welche ins richtige Format gebracht wurden. 
+Zur Validierung der grundsätzlichen Machbarkeit des Systems wurde zunächst ein einfaches Proof of Concept (PoC) entwickelt. Dieses entstand in Form eines Python-basierten Jupyter-Notebooks und diente dazu, die Kernannahmen des Projekts frühzeitig zu überprüfen.
 
-Um die allgemeine Machbarkeit des Projekts zu Prüfen wurde zuerst in einem Jupyter Notebook ein erstes Grundkonzept aufgebaut, welches den aus dem Masterprojekt bekannten Speech-to-Text Service mit einem LLM verbinden sollte. 
+Der PoC verband den aus der MPA bereits entwickeltem Speech-to-Text-Service mit einem Large Language Model, um transkribierte Audiodaten direkt weiterzuverarbeiten und zusammenzufassen. Hierfür wurden Audiodaten manuell erzeugt, in das erforderliche WAV-Format überführt und schrittweise an den Transkriptionsdienst übergeben.
+
+Im Rahmen dieses Prototypen konnten folgende Aspekte erfolgreich validiert werden: 
+
+\begin{itemize}
+    \item grundsätzliche Funktionsfähigkeit der Transkriptionspipeline
+    \item Anbindung eines LLM zur Analyse der Transkripte
+    \item Erzeugung erster inkrementeller Zusammenfassungen
+\end{itemize}
+
+Gleichzeitig traten früh technische Herausforderungen auf, insbesondere im Bereich der Parallelisierung und Thread-Verwaltung. Diese Erkenntnisse bestätigten die Notwendigkeit einer asynchronen, entkoppelten Backend-Architektur und flossen direkt in die weitere Systemgestaltung ein. 
+
+Das Vollständige Jupyter Notebook befindet sich im Anhang
+
+\section{Allgemeine Backendstruktur}
+Tabelle mit Techstack
+Datenfluss (Transkript -> Queue -> analyse -> Websocket)
+Die im vorherigen Kapitel beschriebene Backend-Architektur wurde im Rahmen dieser Arbeit auf Basis der bestehenden Notient-Infrastruktur umgesetzt. Ziel der Implementierung war es, die konzeptionell geplanten Aufgaben des Backends - insbesondere die Koordination der Datenflüsse, die inkrementelle Verarbeitung von Transkriptionsdaten sowie die Entkoppelung der Analysekomponenten - konkret und nachvollziehbar zu realisieren. 
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+         \textbf{Komponent}&  \textbf{Version}\\
+         \hline
+         Django& 4.2.13\\
+         \hline
+         Django REST Framework & 3.15.2\\
+         \hline
+         channels & 4.1.0\\
+         \hline
+         Django corsheaders & 4.4.0\\
+         \hline
+         uvicorn & 0.32.1\\
+         \hline
+         PostgreSQL & 16.3\\
+         \hline
+         Redis & 7.4.1\\
+         \hline
+         Docker Desktop & 4.34.2\\
+         \hline
+         Python & 3.9\\
+         \hline
+         Attendee & 1.0\\
+         \hline
+         ngrok & 3.32.0\\
+         \hline
+    \end{tabular}
+    \caption{Übersicht über die verwendeten Versionen der wichtigsten Komponenten}
+    \label{tab:versions}
+\end{table}
+
+Das Backend des Systems basiert vollständig auf dem Python-Webframework Django und integriert sich als eigenständige App in die bestehene modulare Struktur von Notisent. Diese Vorangehensweise ermöglicht es, bereits vorhandene Funktionen wie Authentifizierung, Datenbankzugriff und Sicherheitsmechanismen direkt mitzunutzen und gleichzeit neue, projektspezifische Funktionalitäten gezielt zu ergänzen.
 
 
+\subsection{Integration in die bestehende Backend-Struktur}
+Das Notisent-Backend folgt dem App-Konzept von Django, bei dem funktional zusammengehörige Logik in klar abgegrenzten Modulen organisiert ist. Für den Meetingassistenten wurde eine eigene App implementiert, die sämtliche Logik zur Verarbeitung von Meeting-Transkripten, zur Steuerung der Analyseprozesse sowie zur Kommunikation mit dem Frontend kapselt. 
 
-\section{Backendstruktur}
-Das Backend von Notisent wurde mit Django ertellt. Django nutzt für die erstellung von Funktionen Apps, welche jeweils eine Aufgabe übernehmen. Für dieses Projekt wurde die Voice app innerhalb von Django erstellt, welche sämtliche funktionen des Meetingassistenten übernehmen wird. 
-Ganz kurz beschreiben wie Struktur wie Notisent backend aufgebaut ist. Daran anschließend erklären wie eigenes Projekt eingebunden wird
+Diese App wird nicht isoliert betrieben, sondern greift auf zentrale Backend-Komponenten von Notisent zurück. Dazu zählen insbesondere: 
 
-Das Notisent Backend ist eine modulare Plattform, welche auf Django und dem Django Rest Framework (DRF) basiert. Es dient als Schnittstelle für die Verarbeitung von Daten, Integration 
+\begin{itemize}
+    \item die bestehende Authentifizierungs- und Benutzerverwaltung
+    \item der Zugriff auf persistente Datenbanken.
+    \item die API-Anbindung an extern gehostete KI-Modelle, die von der Notisent Infrastruktur genutzt werden.
+\end{itemize}
+
+Durch diese Integration konnte vermieden werden, parallele oder redundante Backend-Strukturen aufzubauen.
+
+\subsection{Teams Bot}
+Zur Erstellung eines Bots, welcher am Meeting teilnimmt wurde die open source API Attendee verwendet, diese wird lokal als docker container gehostet und ermöglicht es eigene bots in ein meeting aufzunehmen. 
+Die Bots werden mittels eines Post Requests an Attendee erstellt. Benötigt in dieser Nachricht wird die Meeting URL, ein Attendee Autorization Token sowie ein Bot-Name welcher angezeigt wird. 
+Der Bot wird aus dem Backend gestartet, indem ein Post Request mit den entsprechenden Daten an den Attendee Container gesendet wird, sobald im Frontend der Assistent gestartet wird.
+
+Codesnippet zum starten des Bots. 
+
+\begin{lstlisting}[language=python, style=pythonstyle, caption=Starten des Bots, label=lst:startbot]
+   def post(self, request):
+        """
+        Create a new meeting bot.
+
+        Expected payload:
+        {
+            "meeting_url": "https://teams.microsoft.com/...",
+            "meeting_id": "optional_meeting_id",
+            "bot_name": "optional_bot_name"
+        }
+        """
+        try:
+            meeting_url = request.data.get("meeting_url")
+            meeting_id = request.data.get("meeting_id", "")
+            bot_name = request.data.get("bot_name", "Meeting Bot")
+            if not meeting_url:
+                return Response(
+                    {"error": "meeting_url is required"},
+                    status=http_status.HTTP_400_BAD_REQUEST,
+                )
+            logger.info(f"Creating bot for meeting: {meeting_url}")
+            api_key = os.getenv("BOT_API_KEY")
+            base_url = os.getenv("BOT_SERVICE_BASE_URL")
+\end{lstlisting}
+
+Wie sieht so eine Webhook nachricht aus?
+Beispielhafte Darstellung der Inhalte 
+
+Wie wird bot gestartet, skript dazu zeigen 
+Beschreibung von Attendee, technischer Beitritt (Skript um Bot zu starten), Einschränkungen der Teams API, bewusste Designentscheidung
+
+Zustände und hooks, Trigger in Tabelle 
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+         \textbf{Trigger}&  \textbf{Beschreibung}\\
+         \hline
+         bot.state change & Bot ändert seinen Status (Beitritt, Verlasen usw.)\\
+         \hline
+         transcript.update & Transkriptionsupdates während des Meetings\\
+         \hline
+         chat message.update & Chat Nachrichtenupdates während des Meetings\\
+         \hline
+         participant event.join leave & Ein Teilnehmer betritt oder verlässt das Meeting\\
+         \hline
+         calendar.events update & Kalenderevents wurden synchronisiert und geupdatet\\
+         \hline
+         calendar.state change & Kalender Anbindungsstatus hat sich geändert\\
+         \hline 
+         bot logs.update & Ein Log wurde für den Bot erstellt und geupdatet\\
+         \hline
+    \end{tabular}
+    \caption{Übersicht über die verwendeten Versionen der wichtigsten Komponenten}
+    \label{tab:versions}
+\end{table}
+
+Die Erfassung der Audiodaten erfolgt über einen externen Meeting-Bot, welcher in Microsoft-Teams-Sitzungen eingebunden wird. Der Bot wird über eine REST-Schnittstelle erstellt und verwaltet und ist ausschielßlich für die Teilnahme am Meeting sie die Übermittlung von Ergebnissen verantwortlich. 
+
+Nach dem Start des Meetings übernimmt der Bot folgende Aufbaben: 
+\begin{itemize}
+    \item Beitritt zur Videokonferenz
+    \item Erfassung der gesprochenen Inhalte
+    \item Übertragung von Transkriptionsereignissen an das Backend
+    \item Meldung von Statusänderungen
+    \item Übermittelung von Teilnehmerereignissen
+\end{itemize}
+
+Die Kommunikation zwischen Bot und Backend erfolgt ausschließlich über Webhooks. Diese Architektur stellt sicher, dass der Bot selbst keine Geschäftslogik enthält und lediglich als Datenquelle fungiert. Sämtliche Verarbeitungsschritte, von der Zwischenspeicherung bis zur Zusammenfassung, werden severseitig durchgeführt. Ein Vorteil dieses Ansatzes liegt in der Austauschbarkeit des Bot-Systems. Das Backend verarbeitet lediglich standardisierte Ereignisse, wodurch der Bot prinzipiell durch andere Anbieter oder Plattformen ersetzt werden kann, ohne weitere Anpassung der Kernlogik.
+
+\subsection{Verarbeitung der Transkriptionsdaten}
+Im Gegensatz zum ersten Proof of Concept, bei dem ein eigener Speech-to-Text Service verwendet wurde, verarbeitet das Backend keine rohen Audiodaten. Stattdessen empfängt es während eines laufenden Meetings periodisch übermittelte Transkriptiondaten in Form strukturierter JSON-Nachrichten. Diese Nachricthen enthalten den jeweils neu erkannten Text sowie zusätzliche Metadaten wie Zeitstempel oder Sprecherinformationen.
+
+Beispiel Nachricht welche unter dem trigger update.transcription versendet wird.
+\begin{lstlisting}[language = json, style = jsonstyle, caption=JSON Nachricht]
+{
+ 'duration_ms': 1514,
+ 'speaker_is_host': True,
+ 'speaker_name': 'Yan Ohainski',
+ 'speaker_user_uuid': None,
+ 'speaker_uuid': '8:orgid:8142d695-ab65-4d35-8f36-7f54f8f7c504',
+ 'timestamp_ms': 1765534833261,
+ 'transcription': {'transcript': 'Und dann gibt es da noch einen Chat. Ich wuerde einfach mal mit dem Prio anfangen und dann gucken wir mal durch.'}}
+}
+\end{lstlisting}
+
+Die eingehenden Transkriptsegmente werden über einen dedizierten Webhook im Backend entgegengenommen. Abhängig vom jeweiligen Nachrichtentyp werden sie unterschiedlich verarbeitet. Transkript-Updates werden zunächst validiert und anschließend in eine interne Redis Warteschlange aufgenommen. Sehr kurze oder inhaltlich wenig aussagekräftige Textsegmente können bereits an dieser Stelle gefiltert werden, um unnötige Analyseaufrufe des LLM zu vermeiden. 
+
+Filterlogik und Queue mit Code
+
+Sobald die gesammelten Transkriptsegmente eine definierte Schwelle überschreiten, etwa eine bestimmte Gesamtlänge oder ein zeitliches Fenster, werden sie zu einem zusammenhängenden Textblock aggregiert und zur weiteren Analyse vorbereitet. Diese Aggregation bildet die Grundlage für die inkrementelle Zusammenfassung im Rahmen der Rolling-Summary-Strategie.
+
+Weiterverarbeitung, was passiert wenn Queue voll ist.
+
+\subsection{Anbindung der Analyse- und KI-Komponenten}
+Die eigentliche Analyse der Textdaten erfolgt über eine API-basierte Anbindung an externe KI-Modelle. Das Backend bereitet die aggregierten Transkriptsegmente auf, ergänzt sie um den aktuellen Stand der vorherigen Zusammenfassung und übergibt diese Daten an die KI-Schnittstelle.
+
+Die Rückgabe des Modells, in Form einer aktualisierten Zusammenfassung - wird vom Backend entgegengenommen, validiert und sowohl temporär zwischengespeichert als auch für die Weitergabe an das Frontend vorbereitet. Auf diese Weise entsteht eine fortlaufende aktualisierte Gesamtzusammenfassung des Meetings, die den aktuellen Gesprächsstand widerspiegelt. 
+
+Die konkrete Prompt-Struktur sowie die Logik zur Einbindung vorheriger Zusammenfassungen werden im entsprechenden Unterkapitel zur Prompting-Strategie näher erläutert. 
+
+\subsection{Prompting und Analyse des Transkripts}
+Für das genaue Prompting wird DSPy verwendet, sodass die Prompts die selbes struktur haben
+
+\subsection{Kommunikation mit dem Frontend}
+Die Übertragung der Analyseergebnisse an das Frontend erfolgt über eine WebSocket-Verbindung. Sobald eine neue oder aktualisierte Zusammenfassung vorliegt, wird diese vom Backend an alle verbundenen Clients gesendet. Dadurch können die Nutzer die Ergebnisse nahezu in Echtzeit verfolgen, ohne aktiv neue Daten anfragen zu müssen. 
+
+Klassische REST-Schnittstellen werden ergänzend für Steuerungs- und Verwaltungsaufgaben genutzt, etwa zum Starten oder Beenden von Analyseprozesssen oder zur Abfrage persistenter Meetingdaten. Diese Kombination aus REST und WebSockets erlaubt eine flexible und zugleich effiziente Kommunikation zwischen Backend und Frontend
+
+Utils.py = Hilfsskripte 
+
+\subsection{Einordnung innerhalb der Gesamtarchitektur}
+Die Django Voice-App übernimmt damit eine zentrale Rolle innerhalb der Gesamtarchitktur. Sie fungiert als Vermittler zwischen Bot und LLM, Steuerungseinheit für die Transkriptverarbeitung, Orchestrator für Warteschlange, Cache und Datenbank und Echtzeit-Schnittstelle zum Frontend. 
+
+Durch die klare Trennung zwischen Datenerfassung, Vorverarbeitung, Zusammenfassung und Ausgabe bleibt das System erweiterbar und wartbar. Gleichzeitig ermöglicht der gewählte Ansatz eine stabile Verarbeitung auch bei längeren Meetings oder hoher Teilnehmerzahl.
 
 
+\section{Prompting Live-Transkripts}
+Zur Verarbeitung fortlaufender Sprachtranskripte wurde ein promptbasiertes Verfahren implementiert, das eine inkrementelle Rolling Summary ermöglicht. Ziel ist es neu ankommende Transkriptsegmente schrittweise in eine bestehende Zusammenfassung zu integrieren, ohne den bisherigen Kontext zu verlieren. Die Umsetzung erfolgt mithilfe des Frameworks DSPy, das eine strukturierte Definition von Prompts und deren Ausführung über Large Language Models erlaubt.
 
+Zentraler bestandteil der Implementierung ist eine dedizierte Prompt Struktur, die explizit festlegt welche Eingaben das Sprachmodell erhält und welche Ausgabe erwaret wrid. Diese wird durch eine Klasse definiert, die sich aus \textit{dspy.Signature} ergibt.
 
-Utils.py = hilfsskripte 
+Codesnippet
 
-\section{Teams Bot}
+Die Signatur strukturiert das Prompt in drei Eingabekomponenten: 
+\begin{itemize}
+    \item extra_instructions: Enthält steuernde Anweisungen an das Sprachmodell
+    \item previous_summary: Die beretis bestehende Zusammenfassung, die fortgefüht werden soll. 
+    \item voice_content: Das neu transkribierte Sprachsegment
+\end{itemize}
 
-
-\section{Django voice-App}
-Nachrichten, welche von der Attendee API an den im Notisent Backend liegenden Webhook empfangen werden können verschiedenen Trigger haben, weshalb sie von der API versendet werden. Insgesamt gibt es sieben verschiedene Trigger, auf welche der Bot zugriff hat. 
-Für dieses Projekt sind die wichtigsten "bot.state-change", welcher den status des Bots mitteilt.
-(Ready, Joining, Joined - Not Recording, Joinend - Recording, Leaving, Post Processing, Fatal Error, Waiting Room, Ended) 
-
-Tabelle mit Status und was für informationen dort drin stehen.
-
-transcipt.update um Transkripte zu erhalten 
-participant-events.join-leave um weitere Teilnehmer zu erfassen. 
-
-Wichtigste Aufgabe ist das Handling der ankommenden Daten. Nachrichten von Attendee werden an einen Webhook im Backend gesendet. 
-In der Ersten Version werden die Nachrichten im View auf ihre Trigger gefiltert. Nachrichten mit dem transcript.update trigger werden in eine Warteschlage hinzugefügt, welche die Gesamtlänge der Nachrichten überwacht. Da es oftmals auch sehr kurze Transkripte gibt, etwa wenn von anderen Teilnehmern eine bestätigung in form eines Ok kommt, werden alle ankommenden transkripte auf ihre länge geprüft und anschließend in eine Warteschlage hinzugefügt. Übersteigt die Gesamtlänge aller Nachrichten einen bestimmten Schwellenwert, in der Ersten Version 10 Sekunden, so wird die gesamte Warteschlange zu einer Nachricht zusammengefasst und zur weiterverarbeitung ans llM geschickt. 
-Das ergebnis der Zusammenfassung des LLMs wird als "previous Summary" zwischengespeichert und bei der Nächsten verarbeitung der Warteschlage mit ins llm gegeben um eine koheränte zusammenfassung zu erstellen. 
-
-Anschließend werden die Chunks in der Datenbank gespeichert und über einen Webhook ans Frontend geschickt. Dabei wird immer nur die neuste Nachricht versendet, da diese durch den aufbau der Rolling Summary immer die aktuell vollständige zusammenfassung enthält. 
-
-In der voice App, soll die verarbeitung der Transkriptions-Chunks aus übernommen werden. Dazu wurde zuerst ein Webhook eingerichtet, welcher die von der Attendee API erhaltenen Informationen verarbeitet. 
-Ankommende Nachrichten werden je nach trigger unterschiedlich vearbeitet. 
-Nachrichten welche über die Transcript.Update message versendet werden, werden an eine Nachrichtenwarteschlange angehängt, nach einer festgelgten gesamtdauer aller nachrichten wird die gesamte queue ans llm geschickt. Mehr dazu im "Kapitel Verarbeitung des Live Transkripts"
-
+Konkrete Prompt-Struktur, Chunk größe, Kontextverwaltung, Rolling-Summary-Mechanismus 
+Prompt 
+Länge der Aufnahme anpassen. Was funktioniert besser 10 sekunden oder 5 Sekunden
 Das ergebnis des LLMs wird aktuell mithilfe eines Websockets an das Frontend geschickt. dazu wird eine verbindung mittels Websocket eingerichtet, welche die neusten ergebnisse des LLMs immer 
 Verschiedene Apps, Django 
 DsPy 
@@ -57,19 +228,27 @@ LLM.py = Prompting der Analyse mit Dspy, prompt dort drin, alles was mit AI Call
 braodcast.py kümmert sich um websocket broadcasting der zusammenfassung an Frontend
 cache.py = Zwischenspeichern der Teilzusammenfassungen um 
 
-\section{Prompting Live-Transkripts}
-Prompt 
-Länge der Aufnahme anpassen. Was funktioniert besser 10 sekunden oder 5 Sekunden
-
 \section{Frontend Application}
+
+Techstack vom Frontend in Tabelle 
+
 Weniger Fokus drauf, nur anzeige von Zusammengefassten Texten, TBC 
+Reduzierter Funktionsumfang um allgemeine Funktion zu testen. WebSocket-Kommunikation, Anzeige der live-Zusammenfassung.
+
+Die Frontend-Anwendung wurde als Microsoft-Teams-Tab realisiert und stellt die zentrale Benutzerschnittstell zur Steuerung und Visualisierung der Meeting-Transkription dar. Ziel der Implementierung war eine nahtlose Integration in die Microsoft-Teams-Umgebung sowie eine zuverlässige Echtzeitkommunikation mit dem Backend-System. 
+
+Technisch basiert die Anwendung auf React in Verbindung mit TypeScript und wird über einen Node.js-Server ausgeliefert, der das Microsoft Teams SDK nutzt. Dadurch ist eine direkte Einbettung in Meetings möglich und der Zugriff auf kontextbezogene Informationen wie Meeting-ID und Join-URL gewährleistet. 
+
+Beim Laden der Anwendung erfolgt zunächst die Initialisierung über das Teams SDK. Abhängig vom übergebenen URL-Parameter wird entweder die Konfigurationsansicht oder die eigentliche Hauptanwendung geladen. Nach Abschluss der Konfiguration steht die eigentliche Anwendung zur Verfügung. 
+
+Im Anschluss werden die relevanten Meeting-Informationen aus dem Teams-Kontext ausgelesen. Diese Daten bilden die Grundlage für die Kommunikation mit dem Backend und dienen insbesondere zur Zuordnung der Sitzung. Auf dieser Basis wird ein Backend-Endpunkt aufgerufen, der einen dedizierten Bot für das jeweilige Meeting erzeugt. Die zurückgegebene Bot-ID fungiert als Identifikator für die weitere Kommunikation. 
+
+Die Verbindung zwischen Frontend und Backend erfolgt über WebSockets. Nach erfolgreicher Initialisierung wird ein persistenter WebSocket-Kanal aufgebaut, über den Statusinformationen und Verarbeitungsergebnisse in Echtzeit übertragen weren. Diese Architektur ermöglicht eine kontinuierliche Rückmeldung an die Benutzeroberfläche, ohne wiederholte Polling-Anfragen oder zusätzliche HTTP-Requests.
+
+Die eigentliche Transkription wird durch das starten der Teams Transkriptionsfunktion vom Benutzer gestartet. Nach dem Start signalisiert das System den aktuellen Zustand der Verarbeitung. Dabei wrden unter anderem die Zustände idle, running, success und error unterschieden, die unmittelbar im Frontend visualisiert werden. Statusänderungen werden direkt über die bestehende WebSocket-Verbindung übermittelt. 
+
+Die interne Zustandsverwaltung der Anwendung erfolgt über React Hooks. Dabei werden unter anderem der aktuelle Verbindungsstatus, die aktive Bot-ID, die Meeting-ID sowie der Zustand der laufenden Transkription gespeichert. Für die WebSocket-Verbindung wird zusätzlich eine persistente Referenz verwendet, um Verbindungsabbrüche bei erneuten Render-Zyklen zu vermeiden und eine stabile Kommunikation sicherzustellen. Die gesamte Infrastruktur ist deklarativ konfiguriert und ermöglicht sowohl lokale Entwicklung als auch automatisierte Bereitstellung in der Cloud. 
+
+Insgesamt stellt die implementierte Frontend-Anwendung eine stabile und erweiterbare Schnittstelle dar, die eine zuverlässige Steuerung der Meeting-Transkription ermöglicht. Durch die enge Integration in Microsoft Teams, die Nutzung von WebSockets für Echtzeitkommunikation und die klare Trennung von Präsentations-, Steuerungs- und Kommunikationslogik erfüllt die Implementierung die Anforderungen an eien produktionsnahe Anwendung im Rahmen dieser Arbeit. 
 
 
-\section{Optimierung}
-Doppeloptimierung, Sprachmodell zum erkennen 
-Problem der Zugänglichkeit zu MS Team liveaudio
-Anpassen der Darstellung von 
-zero shot prompting 
-frew shot prompting 
-wie kann das ergebnis des assistenten optimiert werden
-evtl voranalyse? SpaCy
