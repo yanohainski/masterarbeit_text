@@ -19,7 +19,7 @@ Im Rahmen dieses Prototypen konnten folgende Aspekte erfolgreich validiert werde
 
 Gleichzeitig traten während der Entwicklung des ersten PoC früh technische Herausforderungen auf, insbesondere im Bereich der Parallelisierung und Thread-Verwaltung. Die Verarbeitungsschritte für Audioaufnahme, Transkription und LLM-Anfrage wurden zunächst sequentiell implmenentiert. In der Praxis zeigte sich, dass durch die Inferenzzeit des STT-Services sowie des LLM-Aufrufes zur Analyse des Transkripts die Weiteraufnahme von Audiofiles blockiert wurde. Dadurch konnte keine kontinuierlichen Audioaufnahmen erstellt werden, was zu Lücken im Kontext führte. 
 
-Zusätzlich verfügt das LLM kein Sitzungs- oder Prozessgedächtniss. Jede Anfrage wird isoliert behandelt, sodass Kontextinformationen zwischen den Aufrufen verloren gehen. 
+Zusätzlich verfügt das LLM kein Sitzungs- oder Prozessgedächtnis. Jede Anfrage wird isoliert behandelt, sodass Kontextinformationen zwischen den Aufrufen verloren gehen. 
 
 Diese Erkenntnisse bestätigten die Notwendigkeit einer asynchronen, entkoppelten Backend-Architektur mit einer persistenten Datenverwaltung der LLM-Ergebnisse und flossen direkt in die weitere Systemgestaltung ein. 
 
