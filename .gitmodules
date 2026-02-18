@@ -1,0 +1,6 @@
+[submodule "code/skritpte_and_utils"]
+	path = code/skritpte_and_utils
+	url = https://github.com/yanohainski/masterthesis.git
+[submodule "code/frontend"]
+	path = code/frontend
+	url = https://github.com/yanohainski/teams_meeting_app.git
