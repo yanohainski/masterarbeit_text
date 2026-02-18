@@ -8,19 +8,19 @@ Im Gegensatz zu rekurrenten oder konvolutionalen Modellen verzichtet der Transfo
 
 Da alle Token parallel verarbeitet werden, steigt gleichzeitig die Rechenparallelität. Dies führt zu kürzeren Trainingszeiten und einer besseren Skalierbarkeit großer Modelle. In Bezug auf Kontextverständnis, Effizienz und Modellgröße übertreffen Transformer daher klassische Architekturen wie  \textit{Rekurrente neuronale Netze} (RNNs) oder \textit{Convolutionale neuronale Netzwerke} (CNNs) deutlich. Aus diesem Grund bilden sie heute die Grundlage nahezu aller großen Sprachmodelle, darunter \textit{BERT}, \textit{GPT} oder \textit{T5} \cite{Islam2023}\cite{Lin2021}.
 
+\newpage
 Ein klassischer Transformer besteht aus zwei Hauptkomponenten: einem \textit{Encoder} und einem \textit{Decoder}. Der Encoder verarbeitet die Eingabesequenz und erzeugt kontextualisierte Repräsentationen. Der Decoder nutzt diese Repräsentationen, um schrittweise eine Ausgabesequenz zu generieren, beispielsweise eine Übersetzung oder Zusammenfassung \cite{Vaswani2017}. Der Aufbau eines Transformers ist in Abbildung \ref{fig:transformer} zu sehen.
 
 \begin{figure}[h]
 \centering
-\includegraphics[height=0.6\textheight]{Bilder/transformer_architecture3.png}
-\caption{Darstellung der Allgemeinen Transformerarchitektur in Anlehnung an Vaswani \cite{Vaswani2017}}
+\includegraphics[height=0.5\textheight]{Bilder/transformer_architecture3.png}
+\caption{Darstellung der allgemeinen Transformerarchitektur in Anlehnung an Vaswani \cite{Vaswani2017}}
 \label{fig:transformer}
 \end{figure}
 
 Aus dieser funktionalen Trennung haben sich spezialisierte Modellvarianten entwickelt. \textit{Encoder-Only-Modelle} wie BERT werden vor allem für Analyse- und Klassifikationsaufgaben eingesetzt \cite{Devlin2018}. \textit{Decoder-Only-Modelle} wie GPT eignen sich besonders für die autoregressive Textgenerierung. Der Aufbau eines Decoder-Only Transformers ist in Abbildung \ref{fig:decoder} dargestellt. \textit{Encoder-Decoder-Modelle} wie T5 kombinieren beide Ansätze, wie bei einem klassischen Transformer, und werden typischerweise für Sequenz-zu-Sequenz-Aufgaben verwendet \cite{Brown2020}.
 
-
-
+\newpage
 Ein Transformer-Modell besteht im Kern aus vier zentralen Komponenten: dem Input Embedding, den Positional Encodings, dem Self-Attention-Mechanismus sowie einem Feed-Forward-Netzwerk. Diese Bausteine bilden gemeinsam die Grundlage für die Verarbeitung der Eingabedaten \cite{Vaswani2017}.
 
 \begin{figure}[h]
@@ -68,7 +68,7 @@ Das gewählte Token wird an die bestehende Sequenz angehängt und erneut als Ein
 
 Transformer-Modelle werden inzwischen nicht nur für Text eingesetzt. Auch in anderen Modalitäten hat sich die Architektur etabliert. Vision Transformer verarbeiten Bilder als Sequenzen von Bildpatches und ersetzen damit klassische Convolutional Neural Networks. In der Audioverarbeitung kommen Transformer unter anderem für automatische Spracherkennung oder Sprachsynthese zum Einsatz \cite{Prabhavalkar2023}. Ein bekanntes Beispiel ist Whisper, das zeigt, dass sich das Prinzip der Self-Attention ebenso effektiv auf zeitabhängige Signale anwenden lässt.
 
-
+\newpage
 \section{Speech-to-Text}
 Speech-to-Text (STT), auch als Automatic Speech Recognition (ASR) bezeichnet, beschreibt Verfahren zur automatischen Umwandlung gesprochener Sprache in Text \cite{Prabhavalkar2023}. Ziel ist es, ein akustisches Signal so zu verarbeiten, dass daraus eine korrekte schriftliche Repräsentation entsteht. Das System muss dabei Sprache erkennen, linguistisch interpretieren und in verständlichen Text überführen.
 
@@ -112,16 +112,17 @@ Whisper wird zudem in mehreren Modellgrößen von tiny bis large bereitgestellt.
 
 Als sogenanntes Foundation-Modell lässt sich Whisper darüber hinaus an spezifische Anwendungsfälle anpassen. Beim Fine-Tuning wird das vortrainierte Modell mit einer kleineren, domänenspezifischen Datenbasis weitertrainiert. Dadurch können Besonderheiten wie Fachvokabular, Dialekte oder spezielle akustische Bedingungen gezielt berücksichtigt werden.
 
+\newpage
 Im Rahmen dieser Arbeit wurde Whisper – beziehungsweise eine optimierte Implementierung wie Faster-Whisper – auf einem projektspezifischen Datensatz weiter trainiert. Der typische Ablauf dieses Prozesses umfasst folgende Schritte \cite{yan}:
 
 \begin{enumerate}
-    \item \textbf{Vorbereitung und Normalisierung eines transkribierten Audio-Text-Korpus} 
+    \item \textbf{Vorbereitung und Normalisierung eines transkribierten Audio-Text- Korpus} 
 
     Der Korpus besteht aus Audiodateien mit zugehörigen Texttranskripten. In diesem Schritt werden Audio und Text zeitlich und inhaltlich abgeglichen, fehlerhafte oder unvollständige Beispiele entfernt sowie die Transkripte vereinheitlicht, etwa durch Normalisierung von Groß- und Kleinschreibung, Zahlenformaten oder Sonderzeichen.
     
-    \item \textbf{Umwandlung der Audiodaten in Whisper-kompatible Mel-Spektrogramme}
+    \item \textbf{Umwandlung der Audiodaten in Whisper-kompatible Mel Spektrogramme}
 
-    Die Audiosignale werden segmentiert, erneut abgetastet und in Log-Mel-Spektrogramme überführt, welche als standardisierte akustische Eingaberepräsentation für den Whisper-Encoder dienen.
+    Die Audiosignale werden segmentiert, erneut abgetastet und in Log-Mel- Spektrogramme überführt, welche als standardisierte akustische Eingaberepräsentation für den Whisper-Encoder dienen.
 
     \item \textbf{Training des Modells mit reduzierter Lernrate} 
     
@@ -135,7 +136,6 @@ Im Rahmen dieser Arbeit wurde Whisper – beziehungsweise eine optimierte Implem
 Faster-Whisper basiert architektonisch unverändert auf dem ursprünglichen Whisper-Modell \cite{fasterwhisper}. Die zugrunde liegende Netzwerkstruktur sowie die trainierten Gewichte bleiben vollständig erhalten. Stattdessen wird die Ausführung der Inferenz optimiert.
 
 Hierfür kommt eine spezialisierte Inferenz-Engine, beispielsweise CTranslate2, zum Einsatz. Diese ermöglicht eine effizientere Nutzung der Hardware und reduziert die Rechenzeit deutlich. Dadurch steigt die Transkriptionsgeschwindigkeit erheblich, ohne dass Anpassungen am eigentlichen Modell oder zusätzliche Trainingsschritte erforderlich sind.
-
 
 \section{Large-Language-Model (LLM)}
 Large Language Models sind neuronale Netze, die mithilfe von Deep Learning auf sehr großen Textsammlungen trainiert werden \cite{Zhao2023}. Ihr Ziel ist es, Sprache zu verstehen und selbstständig neue Texte zu generieren. Im Gegensatz zu klassischen \textit{Natural Language Processing} (NLP)-Modellen, die meist auf einzelne Aufgaben spezialisiert sind, entwickeln LLMs durch das Training auf breit gefächerten Daten eine allgemeine, domänenübergreifende Sprachkompetenz.
@@ -160,18 +160,16 @@ Bei der Verarbeitung von Sprache und Text mithilfe von KI gibt es verschiedene M
 \subsection{Segmentation}
 Im Bereich der Sprachverarbeitung spielt die Segmentierung von Texten eine zentrale Rolle, insbesondere als Vorbereitungsschritt für große LLMs. Dabei wird ein Text in kleinere, verarbeitbare Einheiten zerlegt, bevor ein Modell den Inhalt analysiert, interpretiert oder zusammenfasst. Diese Aufteilung ist notwendig, weil Sprachmodelle nur eine begrenzte Kontextlänge – gemessen in sogenannten Tokens – verarbeiten können. Wird diese Grenze überschritten, kann das Modell nicht mehr auf den gesamten Inhalt zugreifen; wichtige Zusammenhänge gehen verloren oder werden unvollständig berücksichtigt.
 
-Um dieses Problem zu vermeiden, wird der Text in logisch und semantisch sinnvolle Abschnitte unterteilt, beispielsweise in Absätze, Kapitel oder Themenblöcke. Ziel ist es, die Struktur des Inhalts zu bewahren und gleichzeitig die technischen Beschränkungen des Modells zu berücksichtigen.
+Um dieses Problem zu vermeiden, wird der Text in logisch und semantisch sinnvolle Abschnitte unterteilt, beispielsweise in Absätze, Kapitel oder Themenblöcke. Ziel ist es, die Struktur des Inhalts zu bewahren und gleichzeitig die technischen Beschränkungen des Modells zu berücksichtigen. 
 
-Grundsätzlich lassen sich zwei Hauptansätze der Segmentierung unterscheiden, Fixed Size Segmentation und Semantic Segmentation \cite{Ghinassi2024}.
-
-Bei der Fixed Size Segmentation wird der Text nach einer festgelegten Tokenzahl oder Wortlänge aufgeteilt. Dieses Verfahren ist einfach umzusetzen und rechnerisch effizient, ignoriert jedoch den semantischen Zusammenhang im Text. Dadurch kann es vorkommen, dass ein Segment mitten in einem Satz, Argument oder Kapitel endet, was die inhaltliche Kohärenz stört.
+Grundsätzlich lassen sich zwei Hauptansätze der Segmentierung unterscheiden, Fixed Size Segmentation und Semantic Segmentation \cite{Ghinassi2024}. Bei der Fixed Size Segmentation wird der Text nach einer festgelegten Tokenzahl oder Wortlänge aufgeteilt. Dieses Verfahren ist einfach umzusetzen und rechnerisch effizient, ignoriert jedoch den semantischen Zusammenhang im Text. Dadurch kann es vorkommen, dass ein Segment mitten in einem Satz, Argument oder Kapitel endet, was die inhaltliche Kohärenz stört.
 
 Die Semantic Segmentation verfolgt einen anspruchsvolleren, inhaltlich orientierten Ansatz. Hierbei werden die inhaltlichen Grenzen des Textes erkannt und als Segmentierungsstellen genutzt. Häufig erfolgt dies mithilfe von Text-Embeddings und Clustering-Verfahren.
 Ein Embedding ist eine numerische Repräsentation von Wörtern oder Textpassagen in einem Vektorraum. Wörter oder Sätze mit ähnlicher Bedeutung liegen in diesem Raum näher beieinander, während thematisch unterschiedliche Inhalte größere Abstände aufweisen. Diese Eigenschaft lässt sich gezielt nutzen, um semantische Übergänge zu erkennen\cite{Lo2021}:
 
 Durch Clustering, also das Zusammenfassen ähnlicher Embeddings, können inhaltlich zusammenhängende Textstellen gruppiert werden. Die Übergänge zwischen diesen Clustern markieren dann die inhaltlichen Grenzen des Textes. Auf diese Weise entstehen semantisch homogene Segmente, die sich deutlich von rein mechanisch geschnittenen Textteilen unterscheiden.
 
-Ein Hybridansatz kombiniert beide Methoden: Zunächst wird der Text in technisch handhabbare Einheiten fester Größe geteilt, um Rechenaufwand zu begrenzen. Innerhalb dieser Abschnitte erfolgt anschließend eine feinere, semantisch fundierte Segmentierung. Dieses Verfahren vereint die Effizienz der festen Aufteilung mit der inhaltlichen Präzision der semantischen Methode und ist damit besonders geeignet für komplexe Anwendungen – etwa bei der Verarbeitung langer Transkripte oder wissenschaftlicher Texte, die von großen Sprachmodellen analysiert oder zusammengefasst werden sollen.
+Ein Hybridansatz kombiniert beide Methoden: Zunächst wird der Text in technisch handhabbare Einheiten fester Größe geteilt um Rechenaufwand zu begrenzen. Innerhalb dieser Abschnitte erfolgt anschließend eine feinere, semantisch fundierte Segmentierung. Dieses Verfahren vereint die Effizienz der festen Aufteilung mit der inhaltlichen Präzision der semantischen Methode und ist damit besonders geeignet für komplexe Anwendungen, etwa bei der Verarbeitung langer Transkripte oder wissenschaftlicher Texte.
 
 \subsection{Kontextualisierung}
 Kontextualisierung bezeichnet die Fähigkeit großer Sprachmodelle, den Sinn eines Textes im größeren Zusammenhang zu erfassen und diesen Gesamtzusammenhang aktiv in die Verarbeitung einzubeziehen. Dabei wird nicht nur die Bedeutung einzelner Wörter oder Sätze analysiert, sondern deren Beziehung innerhalb des gesamten Textes berücksichtigt. Durch diesen Prozess kann das Modell die Wichtigkeit einzelner Bereiche erkennen und hervorheben, was zu einer inhaltlich kohärenten, faktentreuen und qualitativ hochwertigen Verarbeitung führt.
@@ -214,9 +212,9 @@ Prompt Engineering bezeichnet das gezielte Gestalten von Eingabeaufforderungen, 
 
 In der Praxis unterscheidet man verschiedene Arten von Prompts:
 \begin{itemize}
-    \item Benutzerprompts – Anweisungen, die direkt vom Benutzer stammen.
-    \item Systemprompts – verborgene Instruktionen, die das Verhalten eines KI-Systems steuern.
-    \item Agentenprompts – Ausgaben eines KI-Agenten, die wiederum als Eingabe für weitere Prozesse dienen können.
+    \item Benutzerprompts: Anweisungen, die direkt vom Benutzer stammen.
+    \item Systemprompts: verborgene Instruktionen, die das Verhalten eines KI-Systems steuern.
+    \item Agentenprompts: Ausgaben eines KI-Agenten, die wiederum als Eingabe für weitere Prozesse dienen können.
 \end{itemize}
 
 Zu den gängigen Strategien zählen Zero-Shot Prompting, bei dem das Modell nur eine Aufgabenbeschreibung erhält, Few-Shot Prompting mit wenigen Beispielpaaren zur Orientierung, sowie Chain-of-Thought (CoT) Prompting, das das Modell zu einer schrittweisen Herleitung seiner Antwort anregt \cite{Schulhoff2024}.

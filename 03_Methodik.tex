@@ -127,10 +127,10 @@ Ein weiteres zentrales Kriterium ist die Qualität der generierten Texte. Für M
 
 Weitere Auswahlkriterien betreffen die Betriebskosten, die Möglichkeit zur lokalen oder kontrollierten Bereitstellung sowie die Integrationsfähigkeit in bestehende Systemlandschaften. Insbesondere im Unternehmenskontext spielen Datenschutz, Reproduzierbarkeit und langfristige Verfügbarkeit eine wichtige Rolle. Diese Punkte spielen in der ersten Betrachtung eine untergeordnete Rolle, sollten aber aufgrund des Hintergrunds von Notisent, einen Datenschutzkonformen Arbeitsassistenten zu entwicklen, trotzdem nicht komplett außer Acht gelassen werden. 
 
+\newpage
 \subsection{Vergleich verschiedener Modelle} 
 Auf Basis der genannten Kriterien wurden mehrere aktuelle LLMs mit verschiedenen Architekturen betrachtet. Dazu zählen unter anderem T5 von Google als Vertreter der Encoder-Decoder Modelle, BERT als Encoder-Only Modell sowie das von Notisent bereits eingesetzte GPT-OSS, ein Decoder-Only Modell.  Diese Modelle wurden gewählt, da sie aufgrund ihrer unterschiedlichen Architektur verschiedene Vor- und Nachteile aufweisen und für ihre jeweilige Architektur die bekanntesten Vertreter sind. Beim Vertreter  Decoder-Only Modelle wurde sich für GPT-OSS entschieden, da es bereits von Notisent verwendet wird.
 
-\newpage
 \textbf{Text-to-Text Transfer Transformer (T5)}
 
 Der Text-To-Text Transfer Transformer (T5) ist ein von Google AI entwickeltes Modell, das alle NLP-Aufgaben einheitlich als Text-zu-Text Problem formuliert \cite{Raffel2019}. Es basiert auf einer klassischen Transformer Architektur bestehend aus Encoder und Decoder, bei der der Encoder die Eingabesequenz verarbeitet und der Decoder daraus eine neue Textsequenz generiert. 
@@ -209,6 +209,7 @@ Zur objektiven Bewertung der Ähnlichkeit zwischen Live- und nachträglicher Zus
 
 Als Grundlage für sämtliche Vergleiche wird das von Microsoft Teams erzeugte Meetingtranskript herangezogen. Auf dieser Basis entstehen zwei unterschiedliche Dokumente, die anschließend miteinander verglichen werden. Zum einen dient das vollständige Meetingtranskript selbst als Referenz, zum anderen wird die im Nachgang automatisch erstellte KI-Zusammenfassung verwendet. Beide Referenztexte werden jeweils der finalen Live-Zusammenfassung gegenübergestellt, um deren Qualität und Übereinstimmung systematisch zu bewerten. 
 
+\newpage
 \subsection{Qualitative Analyse}
 \label{qualitative Analyse}
 Da automatische Metriken die inhaltliche Qualität nur eingeschränkt erfassen können, wird die Evaluation durch eine qualitative Analyse ergänzt. Hierbei werden ausgewählte Meetings manuell untersucht und die beiden Zusammenfassungsvarianten gegenübergestellt. 
