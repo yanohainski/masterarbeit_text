@@ -9,6 +9,7 @@ Zur Validierung der grundsätzlichen Machbarkeit des Systems wurde zunächst ein
 
 Der PoC verband den aus der Masterprojektarbeit (MPA) bereits entwickeltem Speech-to-Text-Service mit einem Large Language Model, um transkribierte Audiodaten direkt weiterzuverarbeiten und zusammenzufassen. Hierfür wurden Audiodaten manuell erzeugt, in das erforderliche WAV-Format überführt und schrittweise an den Transkriptionsdienst übergeben.
 
+\newpage
 Im Rahmen dieses Prototypen konnten folgende Aspekte erfolgreich validiert werden: 
 
 \begin{itemize}
@@ -17,12 +18,11 @@ Im Rahmen dieses Prototypen konnten folgende Aspekte erfolgreich validiert werde
     \item Erzeugung erster inkrementeller Zusammenfassungen
 \end{itemize}
 
-Gleichzeitig traten während der Entwicklung des ersten PoC früh technische Herausforderungen auf, insbesondere im Bereich der Parallelisierung und Thread-Verwaltung. Die Verarbeitungsschritte für Audioaufnahme, Transkription und LLM-Anfrage wurden zunächst sequentiell implmenentiert. In der Praxis zeigte sich, dass durch die Inferenzzeit des STT-Services sowie des LLM-Aufrufes zur Analyse des Transkripts die Weiteraufnahme von Audiofiles blockiert wurde. Dadurch konnte keine kontinuierlichen Audioaufnahmen erstellt werden, was zu Lücken im Kontext führte. 
-
-Zusätzlich verfügt das LLM kein Sitzungs- oder Prozessgedächtnis. Jede Anfrage wird isoliert behandelt, sodass Kontextinformationen zwischen den Aufrufen verloren gehen. 
+Gleichzeitig traten während der Entwicklung des ersten PoC früh technische Herausforderungen auf, insbesondere im Bereich der Parallelisierung und Thread-Verwaltung. Die Verarbeitungsschritte für Audioaufnahme, Transkription und LLM-Anfrage wurden zunächst sequentiell implmenentiert. In der Praxis zeigte sich, dass durch die Inferenzzeit des STT-Services sowie des LLM-Aufrufes zur Analyse des Transkripts die Weiteraufnahme von Audiofiles blockiert wurde. Dadurch konnte keine kontinuierlichen Audioaufnahmen erstellt werden, was zu Lücken im Kontext führte. Zusätzlich verfügt das LLM kein Sitzungs- oder Prozessgedächtnis. Jede Anfrage wird isoliert behandelt, sodass Kontextinformationen zwischen den Aufrufen verloren gehen. 
 
 Diese Erkenntnisse bestätigten die Notwendigkeit einer asynchronen, entkoppelten Backend-Architektur mit einer persistenten Datenverwaltung der LLM-Ergebnisse und flossen direkt in die weitere Systemgestaltung ein. 
 
+\newpage
 \section{Integration in die bestehende Backend-Struktur}
 Das Notisent-Backend folgt dem App-Konzept von Django, bei dem funktional zusammengehörige Logik in klar abgegrenzten Modulen organisiert ist. Für den Meetingassistenten wurde eine eigene App implementiert, die sämtliche Logik zur Verarbeitung von Meeting-Transkripten, zur Steuerung der Analyseprozesse sowie zur Kommunikation mit dem Frontend kapselt. 
 
@@ -35,7 +35,7 @@ Diese App wird nicht isoliert betrieben, sondern greift auf zentrale Backend-Kom
 \end{itemize}
 
 Durch diese Integration konnte vermieden werden, parallele oder redundante Backend-Strukturen aufzubauen.
-\newpage
+
 
 \section{Django Voice App}
 Die im vorherigen Kapitel \ref{sec:Planung_der_software} beschriebene Backend-Architektur wurde im Rahmen dieser Arbeit auf Basis der bestehenden Notisent-Infrastruktur umgesetzt. Ziel der Implementierung war es, die konzeptionell geplanten Aufgaben des Backends - insbesondere die Koordination der Datenflüsse, die inkrementelle Verarbeitung von Transkriptionsdaten sowie die Entkoppelung der Analysekomponenten, konkret und nachvollziehbar zu realisieren. 
@@ -141,12 +141,13 @@ Der Bot arbeitet mit Webhook-Triggern, in Tabelle \ref{tab:attendee_trigger} sin
     \label{tab:attendee_trigger}
 \end{table}
 
+\newpage
 Für die Kommunikation zwischen dem lokal betriebenen Attendee-Dienst und dem ebenfalls lokalen laufenden Backend wird während der Entwicklung der Tunneling-Dienst \textit{ngrok} eingesetzt. Attendee setzt für die Übermittelung der Ergebnisse eine öffentlich erreichbare HTTPS-Endpoint-Adresse voraus. 
 Der Einsatz ist erforderlich, da Attendee zur Ergebnisübermittelung einen Webhook mit einer Verschlüsselten HTTPS-Verbindung benötigt und nicht an eine HTTP-Verbindung senden kann. Da das lokale Backend standardmäßig nur über HTTP innerhalb des Docker- bzw. Host-Netzwerks erreichbar ist, kann Attendee diesen Endpoint ohne Weiteres nicht ansprechen. Ngrok stellt hierfür temporär einen sicheren HTTPS-Tunnel bereit, der eingehende Webhook-Anfragen an das lokale Backend weiterleitet.
 
 Im produktiven Betrieb ist dieser Zwischenschritt nicht erforderlich, da das Backend dort direkt über eine reguläre HTTPS-Infrastruktur erreichbar ist.
 
-\newpage
+
 \subsection{Verarbeitung der Transkriptionsdaten}
 Im Gegensatz zum ersten Proof of Concept, bei dem ein eigener Speech-to-Text Service verwendet wurde, verarbeitet das Backend keine rohen Audiodaten. Stattdessen empfängt es während eines laufenden Meetings periodisch übermittelte Transkriptiondaten in Form strukturierter JSON-Nachrichten. Diese Nachrichten enthalten den jeweils neu erkannten Text sowie zusätzliche Metadaten wie Zeitstempel oder Sprecherinformationen. Die Abbildung \ref{fig:Attendee_json} zeigt eine Beispielhafte JSON-Nachricht, welche an den Backend-Webhook gesendet wird mit dem Trigger \texttt{Transcript.Update}.
 
