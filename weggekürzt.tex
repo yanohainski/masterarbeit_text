@@ -172,3 +172,28 @@ Use plain text without mardown syntax for your reasoning and tool calls.
 Always call the tools with a proper online input.
 Wait for the result, then continue your reasoning."""
 \end{lstlisting}
+
+Implementierung DSPy
+Zur Verarbeitung fortlaufender Sprachtranskripte wurde ein promptbasiertes Verfahren implementiert, das eine inkrementelle Rolling Summary ermöglicht. Ziel ist es neu ankommende Transkriptsegmente schrittweise in eine bestehende Zusammenfassung zu integrieren, ohne den bisherigen Kontext zu verlieren. Die Umsetzung erfolgt mithilfe des Frameworks DSPy, das eine strukturierte Definition von Prompts und deren Ausführung über Large Language Models erlaubt.
+
+Zentraler bestandteil der Implementierung ist eine dedizierte Prompt Struktur, die explizit festlegt welche Eingaben das Sprachmodell erhält und welche Ausgabe erwaret wrid. Diese wird durch eine Klasse definiert, die sich aus \textit{dspy.Signature} ergibt.
+
+Frontend: 
+Weniger Fokus drauf, nur anzeige von Zusammengefassten Texten, TBC 
+Reduzierter Funktionsumfang um allgemeine Funktion zu testen. WebSocket-Kommunikation, Anzeige der live-Zusammenfassung.
+
+kapitel 5 
+optimierung: 
+Doppeloptimierung, Sprachmodell zum erkennen 
+Problem der Zugänglichkeit zu MS Team liveaudio
+Anpassen der Darstellung von 
+zero shot prompting 
+frew shot prompting 
+wie kann das ergebnis des assistenten optimiert werden
+evtl voranalyse? SpaCy
+Performance-optimierung, latenzreduktion, asynchronität, filterstrategien, skalierbarkeit 
+
+\section{Ausblick}
+Verbessern der Funktionen, Mehr finetuning der Spracherkennung. 
+Datenschutz weitere Auswertung und Optimierung wie im kapitel Optimierung beschrieben. 
+Ergänzung von Funktionen wie in Anforderungen beschrieben

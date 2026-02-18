@@ -1,59 +1,179 @@
 \chapter{Ergebnisse}
 \section{Durchführung der Tests}
-Die Tests werden wie geplant im Frontend durchgeführt. Dafür werden die Prompts im Frontend Code als Konstante gespeichert um eine einfache Austauschbarkeit während der Entwicklung zu gewährleisten. Eine Übersicht über die 20 Prompts, welche für diese Tests verwendet werden ist in Tabelle \ref{tab:prompts} aufgelistet, wobei die Spalte \textit{E-Mail Id} angibt auf welche E-Mail in der Datenbank dieser Prompt verweist. Diese Prompts wurden wie in Kapitel \ref{sec:eval} beschrieben synthetisch erzeugt und anschließend manuell überprüft, ob dieser Prompt Sinn ergibt und auf eine Mail verweist, die diesen Inhalt auch enthält. Dabei stellt es zum Beispiel kein Problem dar, dass die Prompts mit den IDs 3 und 20 auf dieselbe Mail verweisen, da eine hier vorhandene Variation der Formulierung für diesen auf die Funktionalität des Agenten ausgelegten Test ausreichenden Mehrwert bieten. Für die Durchführung von einzelnen Testreihen wurde der Identifier \textit{test\_id} im Backend bzw. \textit{testId} im Frontend eingeführt mit dem die Prompts, E-Mails und Konversationen einer Testreihe gruppiert werden können.
-Die Tests werden dann wie folgt durchgeführt:
+Zur Evaluation des entwickelten Systems wurden mehrere reale Meetings mit einer Dauer von jeweils etwa zehn bis fünfzehn Minuten aufgezeichnet und analysiert. Für alle Versuche wurden identische Rahmenbedingungen verwendet, um die Vergleichbarkeit der Ergebnisse sicherzustellen. Insbesondere kamen durchgängig derselbe Prompt sowie dasselbe LLM zur Generierung der Live-Zusammenfassungen zum Einsatz. 
+Die auf Basis des Transkripts erstellte Gesamtzusammenfassung wurde mithilfe von Chat-GPT 5.2 erstellt mit dem Prompt: \textit{Du bist ein Spezialist für Meeting Zusammenfassungen. Fasse das folgende Transkript zusammen} erstellt.
+
+Die während der Meetings erzeugten Live-Zusammenfassungen wurden direkt aus dem Frontend des Systems exportiert. Zusätzlich wurden vollständige Transkripte von Microsoft Teams gespeichert. Sowohl die Transkripte als auch die Live-Zusammenfassungen sind im Anhang dokumentiert. 
+
+Zur quantitativen Bewertung der Zusammenfassungsqualität wurden die Metriken ROUGE sowie BERTScore eingesetzt. Hierfür wurde ein Python-Skript implementiert, das jeweils zwei Texte einliest und die entsprechenden Kennzahlen automatisch berechnet. Verglichen wurden die automatisch erzeugte Live-Zusammenfassung des Systems mit: 
+
+\begin{enumerate}
+    \item dem Meetingtranskript von Microsoft Teams 
+    \item einer durch ein LLM und dem Meetingtranskript erstellten Zusammenfassung (\textit{AI-Summary}) in den folgenden Tabellen.
+\end{enumerate}
+
+Die Tabelle \ref{tab:Meetings} gibt einen Überblick über die untersuchten Meetings.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{3.5cm}|p{8cm}|c|}
+    \hline
+    \textbf{Meetingname} & \textbf{Beschreibung} & \textbf{Teilnehmer}\\
+    \hline
+    Yan Weekly Checkout & Statusupdate über den aktuellen Prototypen mit Masterarbeitsbetreuer & 2\\
+    \hline
+    Daily Standup 1& Beschreibung über aktuelle anstehende Aufgaben und Deadlines im Notisent-Team & 6\\
+    \hline
+    Daily Standup 2& Beschreibung über aktuelle anstehende Aufgaben und Deadlines im Notisent-Team & 5\\
+    \hline
+    \end{tabular}
+    \caption{Durchgeführte Meetings}
+    \label{tab:Meetings}
+\end{table}
 
 \section{Analyse}
+\subsection{Automatische Metriken}
+Insgesamt wurden drei Meetings ausgewertet. Für jedes Meeting wurde die Qualität der automatisch erzeugen Texte anhand eines paarweisen Vergleichs mit einer Referenz untersucht. Ziel war es, sowohl die inhaltliche Übereinstimmung als auch die semantische Nähe der generierten Zusammenfassung zu quantifizieren. 
 
+Zur Bewertung wurden die Metriken ROUGE-1, ROUGE-2 und ROUGE-L, sowie ergänzend der Bertscore verwendet. Diese Metriken wurden in Kapitel \ref{KPI} als Leistungskennzahlen bestimmt. 
+
+\textit{Precision} beschreibt den Anteil der generierten Inhalte, die auch in der Referenz enthalten sind. \textit{Recall} misst, welcher Anteil der Referenzinhalte durch die generierte Zusammenfassung abgedeckt wird. Die \textit{F-Measure} stellt das harmonische Mittel beider Werte dar und dient als Gesamtindikator für die Qualität. 
+
+Ein hoher ROUGE-Wert weist auf eine starke textuelle Überlappung hin, während ein hoher BERTScore zusätzlich eine semantische Übereinstimmung signalisiert, selbst wenn unterschiedliche Formulierungen verwendet werden.
+
+Beide Metriken liefern Werte im Bereich zwischen 0 und 1, wobei 1 für eine hohe Ähnlichkeit hindeutet und 0 für keine Ähnlichkeit. Wird mit dem ROUGEScore oder BERTScore der selbe Text verglichen, so würde ein Ergebnis von 1 herauskommen. 
+
+Zur groben Einordnung der Werte können folgende Bereiche herangezogen werden. 
+
+\begin{itemize}
+    \item Unter 0.7 geringe inhaltliche Übereinstimmung
+    \item 0.7 bis 0.8 akzeptable Übereinstimmung
+    \item ab 0.8 gute Übereinstimmung
+    \item ab 0.9 sehr gute Übereinstimmung    
+\end{itemize}
+
+Bereits kleine Verbesserungen von wenigen Hundertstelpunkten können dabei eine messbare Qualitätssteigerung bedeuten.
+
+Die Ergebnisse der einzelnen Meetings sind in den nachfolgenden Tabellen \ref{tab:test1} \ref{tab:test2} \ref{tab:test3} dargestellt.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{2cm}|c|c|c|c|}
+    \hline
+    & \textbf{Rouge-1} & \textbf{Rouge-2} & \textbf{Rouge-L} &\textbf{BERTScore}\\ \hline
+    \hline
+    Transkript & \makecell[l]{Precision: 0.6223\\ Recall: 0.0878\\ F-measure: 0.1539} & \makecell[l]{Precision: 0.1706\\ Recall: 0.0240\\ F-measure: 0.0421} & \makecell[l]{Precision: 0.2114\\ Recall: 0.0298\\ F-measure: 0.0523} &\makecell[l]{Precision: 0.6188\\ Recall: 0.6169\\ F1 Score: 0.6178} \\
+    \hline
+    AI Summary & \makecell[l]{Precision: 0.2603\\ Recall: 0.4236\\ F-measure: 0.3224} & \makecell[l]{Precision: 0.0333\\ Recall: 0.0543\\ F-measure: 0.0413} & \makecell[l]{Precision: 0.0822\\ Recall: 0.1338\\ F-measure: 0.1018} &\makecell[l]{Precision: 0.6908\\ Recall: 0.6592\\ F1 Score: 0.6746} \\
+    \hline
+    \end{tabular}
+    \caption{Testergebnisse Yan Weekly Checkout}
+    \label{tab:test1}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{2cm}|c|c|c|c|}
+    \hline
+     & \textbf{Rouge-1} & \textbf{Rouge-2} & \textbf{Rouge-L} &\textbf{BERTScore}\\ \hline
+    \hline
+    Transkript & \makecell[l]{Precision: 0.0797\\ Recall: 0.6517\\ F-measure: 0.1420} & \makecell[l]{Precision: 0.0240\\ Recall: 0.1972\\ F-measure: 0.0429} & \makecell[l]{Precision: 0.0357\\ Recall: 0.2921\\ F-measure: 0.0636} &\makecell[l]{Precision: 0.6254\\ Recall: 0.6284\\ F1 Score: 0.6269} \\
+    \hline
+    AI Summary & \makecell[l]{Precision: 0.2883\\ Recall: 0.3174\\ F-measure: 0.3021} & \makecell[l]{Precision: 0.0460\\ Recall: 0.0507\\ F-measure: 0.0483} & \makecell[l]{Precision: 0.0969\\ Recall: 0.1067\\ F-measure: 0.1016} &\makecell[l]{Precision: 0.7066\\ Recall: 0.6922\\ F1 Score: 0.6993} \\
+    \hline
+    \end{tabular}
+    \caption{Testergebnisse Daily Standup 1}
+    \label{tab:test2}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{2cm}|c|c|c|c|}
+    \hline
+     & \textbf{Rouge-1} & \textbf{Rouge-2} & \textbf{Rouge-L} &\textbf{BERTScore}\\ \hline
+    \hline
+    Transkript & \makecell[l]{Precision: 0.1748\\ Recall: 0.5963\\ F-measure: 0.2703} & \makecell[l]{Precision: 0.0590\\ Recall: 0.2014\\ F-measure: 0.0912} & \makecell[l]{Precision: 0.0606\\ Recall: 0.2068\\ F-measure: 0.0937} &\makecell[l]{Precision: 0.6355\\ Recall: 0.6332\\ F1 Score: 0.6343} \\
+    \hline
+    AI Summary & \makecell[l]{Precision: 0.4746\\ Recall: 0.1969\\ F-measure: 0.2783} & \makecell[l]{Precision: 0.0714\\ Recall: 0.0296\\ F-measure: 0.0418} & \makecell[l]{Precision: 0.1458\\ Recall: 0.0605\\ F-measure: 0.0855} &\makecell[l]{Precision: 0.6720\\ Recall: 0.6552\\ F1 Score: 0.6635} \\
+    \hline
+    \end{tabular}
+    \caption{Testergebnisse Daily Standup 2}
+    \label{tab:test3}
+\end{table}
+
+Die quantitativen Ergebnisse zeigen, dass die automatisch erzeugten Live-Zusammenfassungen eine höhere Übereinstimmung mit der nachträglichen AI-Summary aufweisen als mit dem vollständigen Rohtranskript. Dies wird besonders durch den BERTScore bestätigt, der die semantische Ähnlichkeit misst. Während der BERTScore im Vergleich mit dem Transkript zwischen 0.6178 und 0.6343 liegt, erreicht der Vergleich mit der AI-Summary durchgehend höhere Werte zwischen 0.6635 und 0.6993. Dies zeigt, dass die Live-Zusammenfassung semantisch näher an einer kompakten, inhaltlich verdichteten Referenzzusammenfassung liegt als am vollständigen Transkript, welches naturgemäß viele irrelevante oder redundante Informationen, wie beispielsweise Smalltalk und Füllwörter, enthält.
+
+Auch die ROUGE-1-F-Measure bestätigt dieses Verhalten deutlich. Beispielsweise steigt der Wert im Meeting „Yan Weekly Checkout“ von 0.1539 beim Vergleich mit dem Transkript auf 0.3224 beim Vergleich mit der AI-Summary. Ein ähnlicher Effekt zeigt sich im „Daily Standup 1“, wo sich der Wert von 0.1420 auf 0.3021 mehr als verdoppelt. Dies verdeutlicht, dass die Live-Zusammenfassung zentrale Inhalte selektiv extrahiert und stärker mit einer strukturierten Zusammenfassung übereinstimmt als mit dem vollständigen Gesprächsverlauf.
+
+Die Unterschiede zwischen Precision und Recall liefern zusätzliche Hinweise auf das Verhalten des Systems. Beim Vergleich mit dem Transkript ist der Recall teils sehr hoch, beispielsweise 0.6517 im „Daily Standup 1“, während die Precision gleichzeitig sehr niedrig ist (0.0797). Dies deutet darauf hin, dass das Transkript zwar viele relevante Inhalte enthält, jedoch auch große Mengen irrelevanter Informationen umfasst. Die Live-Zusammenfassung hingegen weist im Vergleich mit der AI-Summary deutlich ausgewogenere Precision- und Recall-Werte auf, was auf eine bessere inhaltliche Fokussierung hinweist.
+
+Die insgesamt moderaten BERTScore-Werte im Bereich von etwa 0.66 bis 0.70 zeigen, dass eine semantische Übereinstimmung vorhanden ist, jedoch noch viel Verbesserungspotenzial besteht. Dies lässt sich unter anderem durch Informationsverluste, Transkriptionsfehler und die inkonsistente Fortschreibung der Rolling Summary erklären, wie in der qualitativen Analyse im folgenden Kapitel \ref{subjektiv_Bewertung} verdeutlicht wird. Insgesamt bestätigen die Ergebnisse, dass das System in der Lage ist, relevante Inhalte zu identifizieren und in kompakter Form wiederzugeben, jedoch noch nicht die Qualität einer nachträglich auf dem vollständigen Transkript basierenden Zusammenfassung erreicht.
+
+\subsection{Qualitative Bewertung}
+\label{subjektiv_Bewertung}
+Im Rahmen der Evaluation wurden Meetings unterschiedlicher Größe hinsichtlich der Qualität der automatisch generierten Live-Zusammenfassungen analysiert. Ein Daily Stand-up mit sechs Teilnehmern, sowie ein weiteres Daily Stand-up mit fünf Teilnehmern und ein Weekly Checkout Meeting mit zwei Teilnehmern. Die Auswertung fokussierte die zeitliche Verfügbarkeit von Informationen, die thematische Gewichtung im Verlauf sowie die Erkennbarkeit von Entscheidungen, Aufgaben und offenen Punkten. Auf welche Fragen genau bei der qualitativen Bewertung eingegangen wird, ist aus Kapitel \ref{qualitative Analyse} zu entnehmen.
+
+Alle Transkripte und erstellten Zusammenfassungen (nachträgliche AI-Summary und Live erstellten Zusammenfassungen) sind im Anhang vollständig dokumentiert.
+
+Bezüglich der zeitlichen Einordnung von Informationen zeigte sich, dass Inhalte nicht stabil oder konsistent in der Zusammenfassung repräsentiert werden. Einzelne Aspekte tauchten verspätet auf oder wurden in späteren Iterationen der Rolling Summary verfälscht fortgeführt. Fehlinterpretationen in frühen Zwischenständen persistierten dabei und wurden durch nachfolgende Aktualisierungen nicht zuverlässig korrigiert.  
+
+Ein deutliches Beispel hierfür zeigte sich im Weekly Checkout Meeting im Zusammenhang mit der \textit{Automatisierung der Anhang-Integration}. In der Rolling-Summary wurde dieser Punkt explizit als Anforderung aufgeführt. "\textit{Automatisierung der Anhang Integration (Yans Wunsch)}" (vlg. \ref{app:Weekly_live})
+Im Transkript des Meetings findet sich jedoch keine entsprechende Aussage. Stattdessen wurde vom Teilnehmer: "\textit{Ich wollte das Ganze schon noch mit in den Anhang nehmen und auswerten}" (vgl. \ref{app:Weekly_transkript}). Diese Aussage bezieht sich ausschließlich auf die Aufnahme bestehender Inhalte in einen Anhang, nicht auf die Implementierung einer automatisierten Anhang-Integration. Dieses Verhalten verdeutlicht, dass fehlerhafte Inhalte, die aus Transkriptionsfehlern oder Fehlinterpretationen entstehen, persistent fortgeführt werden. Das System interpretierte hier eine Dokumentationsabsicht fälschlicherweise als Implementierungsanforderung. 
+
+Transkriptionsfehler wirken sich kumulativ aus und führen zu dauerhaft inkorrekten oder kontextuell unpassenden Einträgen. Gleichzeitig wurden einige der besprochenen Themen vollständig ausgelassen, während irrelevante Informationen, etwa Begrüßungen oder Verabschiedungen teilweise enthalten sind. 
+
+Beispielsweise wurden im Daily Stand-up 1 mit sechs Teilnehmern informelle Aussagen ohne fachlichen Bezug, wie organisatorische Details zur Mittagsplanung, explizit in die Live-Zusammenfassung aufgenommen. Diese Inhalte haben keinen Bezug zu Projektfortschritt oder Aufgabenverteilung, wurden jedoch dennoch als eigenständige Informationseinträge geführt. Gleichzeitig wurden technische oder konzeptionelle Details zu Systemarchitektur und Implementierungsentscheidungen teilweise nur stark verkürzt oder unvollständig dargestellt. Dies verdeutlicht die fehlende Fähigkeit des Systems, zwischen relevanten und irrelevanten Gesprächsinhalten zuverlässig zu unterscheiden.
+
+Hinsichtlich der thematischen Gewichtung zeigte sich ein deutlicher Recency-Effekt. Inhalte aus den letzten Gesprächsabschnitten waren überproportional stark vertreten, während frühere Punkte im Verlauf an Sichtbarkeit verloren oder vollständig verdrängt wurden. Darüber hinaus war die Detailtiefe inkonsistent: Teilweise wurden Themen unnötig ausführlich beschrieben, während andere nur oberflächlich oder gar nicht berücksichtigt wurden. 
+
+Die Qualität der Zusammenfassung korrelierte dabei erkennbar mit der Gesprächsstruktur; kurze und klar formulierte Beiträge führten zu präziseren Ergebnissen, während längere oder komplexe Diskussionsabschnitte häufiger fehlerhaft oder verkürzt wiedergegeben wurden. Erkennen lässt sich dies im Daily Stand Up Meeting 1, in welchem die Aussage: "\textit{O.K., ja, ich würd heute versuchen, irgendwie so weit wie möglich dieses Feature Flag Ding abzuschließen. Ich hab da gestern noch so 'n bisschen bisschen was von gemacht und funktioniert jetzt schon, dass man so Teil Teile der Funktion dann halt ausblenden kann, wenn man die nicht sehen will oder den Leuten nicht zeigen möchte. Ja genau, das jetzt nochmal durchsprechen, gleich mit Henry, was genau da alles so rein muss und was so ein bisschen unnötig ist, was ich da schon gebaut habe oder so. Genau."}(vgl. \ref{app:Daily1_transkript}), zu "\textit{**Feature‑Flag (Joshua Sukowski):** Ziel ist, das Feature‑Flag‑Feature heute so weit wie möglich abzuschließen; weitere Abstimmung mit Henri zu notwendigen UI‑Elementen und „hide‑bar“ steht aus. Dokumentation und Funktionsdefinition stehen im Fokus.}" (vgl. \ref{app:Daily1_live}) zusammengefasst wurde. Im kleineren Zwei-Personen-Meeting trat dieses Problem zwar abgeschwächt, jedoch weiterhin systematisch auf.
+
+Die Erkennung von Entscheidungen, Aufgaben und offenen Punkten war grundsätzlich möglich, jedoch inhaltlich unzuverlässig. To-Dos wurden häufig identifiziert, allerdings nicht konsistent den korrekten Personen zugeordnet. Kontextverluste und fehlerhafte Sprecherzuweisungen beeinträchtigten die Nachvollziehbarkeit der Verantwortlichkeiten. Explizite Entscheidungen oder offene Fragen wurden nicht durchgehend als solche hervorgehoben, sodass eine strukturierte Aktionsübersicht nur eingeschränkt gegeben war.
+
+Beispielsweise wurde im Daily Stand-up mit sechs Teilnehmern die Erstellung eines Jira-Tickets zwar in der Live-Zusammenfassung erwähnt, jedoch nicht konsistent als klar zugewiesene Aufgabe mit Verantwortlichkeit und zeitlichem Bezug strukturiert dargestellt. Ebenso wurden allgemeine Arbeitsbeschreibungen, etwa Hinweise zur weiteren Implementierung oder Dokumentation, teilweise als konkrete To-Dos interpretiert, obwohl im Gespräch keine explizite Aufgabenvergabe erfolgt war.
+
+Im Gegensatz dazu zeigte die nachträgliche KI-basierte Zusammenfassung, die auf dem vollständigen Transkript basierte, eine deutlich konsistentere Darstellung von Aufgaben und Verantwortlichkeiten. Diese Zusammenfassungen enthielten eine klarere Strukturierung der Themenbereiche und reduzierten die Aufnahme irrelevanter oder informeller Inhalte deutlich. Beispielsweise wurden organisatorische Randbemerkungen und informelle Gesprächsanteile in der nachträglichen Zusammenfassung weitgehend ausgeblendet, während zentrale Aufgaben wie die Fertigstellung technischer Komponenten, die Durchführung von Tests oder die Erstellung von Workflow-Dokumentationen klar und konsistent dargestellt wurden. Dies verdeutlicht, dass die Nutzung des vollständigen Transkripts als Kontext eine stabilere und semantisch konsistentere Zusammenfassung ermöglicht als die inkrementelle Verarbeitung einzelner Transkriptsegmente.
+
+Zusammenfassend zeigt sich, dass die Live-Zusammenfassung zwar eine grobe inhaltliche Orientierung ermöglicht, jedoch unter fortschreitender Gesprächsdauer an Genauigkeit verliert. Transkriptionsfehler, Persistenz falscher Einträge und eine unausgewogene Gewichtung der Inhalte führen zu Informationsverlusten und Verzerrungen. Für eine zuverlässige Dokumentation von Verantwortlichkeiten und Entscheidungen ist daher weiterhin eine manuelle Nachbearbeitung erforderlich.
+
+
+\newpage
 \section{Optimierungsmöglichkeiten}
-Doppeloptimierung, Sprachmodell zum erkennen 
-Problem der Zugänglichkeit zu MS Team liveaudio
-Anpassen der Darstellung von 
-zero shot prompting 
-frew shot prompting 
-wie kann das ergebnis des assistenten optimiert werden
-evtl voranalyse? SpaCy
-Performance-optimierung, latenzreduktion, asynchronität, filterstrategien, skalierbarkeit 
+\label{optimierung}
+In diesem Kapitel werden mögliche Optimierungsansätze für den entwickelten Meeting-Assistenten diskutiert. Der Fokus liegt dabei nicht auf bereits implementierten Maßnahmen, sondern auf theoretisch sinnvollen Verbesserungsmöglichkeiten, die sich aus den identifizierten Schwachstellen sowie aus den technischen Rahmenbedingungen des Systems ergeben.
 
-In diesem Kapitel werden mögliche Optimierungsansätze für den entwickelten Meeting-Assistenten diskutiert. Der Fokus liegt dabei nicht auf bereits implementierten Maßnahmen, sondern auf theoretisch sinnvollen Verbesserungsmöglichkeiten, die sich aus dem aktuellen Stand der Forschung sowie aus den technischen Rahmenbedingungen des Systems ergeben. 
+Ein zentraler Einflussfaktor auf die Qualität der erzeugten Zusammenfassungen ist die zugrunde liegende Transkriptionsqualität. Wie die qualitative Analyse gezeigt hat, führen Transkriptionsfehler direkt zu fehlerhaften oder verzerrten Zusammenfassungen, da das LLM ausschließlich auf Basis des bereitgestellten Textes arbeitet. Fehlerhafte Sprecherzuweisungen, unvollständige Sätze oder falsch erkannte Begriffe können dabei zu Fehlinterpretationen führen, die im weiteren Verlauf der Rolling Summary erhalten bleiben. Die Verbesserung der automatischen Spracherkennung stellt daher grundsätzlich einen der effektivsten Optimierungsansätze dar, da sie die gesamte nachgelagerte Verarbeitung positiv beeinflusst.
 
-Da die automatische Spracherkennung durch Microsoft Teams vorgegeben ist und nicht beeinflusst werden kann, beziehen sich alle Optimierungsansätze ausschließlich auf die Weiterverarbeitung der erzeugten Transkripte, die Interaktionen mit dem LLM sowie auf architektonische Aspekte des Systems. Dadurch ergeben sich folgende Rahmenbedingungen: 
+Im vorliegenden System ist die Transkription jedoch durch Microsoft Teams vorgegeben und kann nicht direkt beeinflusst oder ersetzt werden. Eine Integration alternativer Speech-to-Text-Systeme wie Whisper oder spezialisierter ASR-Modelle ist durch den gewählten Architekturansatz technisch möglich, würde jedoch eine eigenständige Audioaufzeichnung und -verarbeitung erfordern und liegt außerhalb des aktuellen Systemdesigns. Aus diesem Grund beziehen sich die im Folgenden diskutierten Optimierungsansätze vorerst ausschließlich auf die Weiterverarbeitung der erzeugten Transkripte, die Interaktion mit dem LLM sowie auf architektonische Aspekte des Systems.
+
+Daraus ergeben sich folgende Rahmenbedingungen: 
 \begin{itemize}
     \item Die Qualität der Transkripte ist aktuell nicht steuerbar 
     \item Fehlerhafte oder unvollständige Erkennung müssen nachträglich behandelt werden.
     \item Optimierungen können ausschließlich auf Textbasis erfolgen. 
     \item Die Verarbeitung erfolgt zeitnah, jedoch nicht in strikter Echtzeit
 \end{itemize}
-Dadurch wird klar, dass die Optimierung vor allem auf der semantsichen und strukturellen Ebene ansetzen muss. 
+Dadurch wird klar, dass die Optimierung vor allem auf der semantischen und strukturellen Ebene ansetzen muss. 
 
-Ein wesentlicher Ansatzpunkt zur Verbesserung der Ergebnisqualität liegt in der Aufbereitung der Transkripte vor der Übergabe an das Sprachmodell, mögliche Maßnahmen umfassen: 
-\begin{itemize}
-    \item Segmentierung der Transkripte in inhaltlich zusammenhängende Abschnitte
-    \item Entfernung redundanter Inhalte, etwa Wiederholungen oder Füllwörter
-    \item Normalisierung der Sprache z.B. Vereinheitlichung von Satzfragmenten
-    \item Markierung von Sprecherwechseln oder Themenübergängen
-\end{itemize}
-Eine solche Vorverarbeitung kann dazu beitragen, die Komplexität der Eingabe zu reduzieren und dem Sprachmodell klarere semantische Strukturen bereitzustellen. Dies ist insbesondere bei längeren Meetings relevant, in denen thematsiche Sprünge und Wiederholungen häufig auftreten. 
+Ein wesentlicher Ansatzpunkt zur Verbesserung der Ergebnisqualität liegt in der Aufbereitung der Transkripte vor der Übergabe an das Sprachmodell. Dazu gehören die Segmentierung in inhaltlich zusammenhängende Abschnitte, die Entfernung redundanter Inhalte oder Füllwörter, die sprachliche Normalisierung durch Vereinheitlichung von Satzfragmenten sowie die Markierung von Sprecherwechseln und Themenübergängen. 
 
+Eine solche Vorverarbeitung kann dazu beitragen, die Komplexität der Eingabe zu reduzieren und dem Sprachmodell klarere Strukturen bereitzustellen. Dies ist insbesondere bei längeren Meetings relevant, in denen thematische Sprünge und Wiederholungen häufig auftreten. 
+
+Neben der inhaltlichen Vorverarbeitung der Transkripte stellt auch die Struktur der Eingabedaten einen wichtigen Einflussfaktor auf die Ergebnisqualität dar. Anstelle der Übergabe unstrukturierter Fließtexte kann eine strukturierte Repräsentation, beispielsweise in Form von JSON-Objekten mit expliziten Feldern für Sprecher, Zeitstempel und Inhalt, die Verarbeitung durch das Sprachmodell verbessern. Insbesondere im Kontext von DSPy ermöglicht eine solche Struktur die Definition klarer Eingabeparameter, wodurch Sprecherwechsel eindeutig zugeordnet werden können und die Notwendigkeit einer Interpretation durch das Modell reduziert wird. Dies führt zu einer geringeren Mehrdeutigkeit und erhöht die Robustheit sowie Nachvollziehbarkeit der Verarbeitung.
+
+Darüber hinaus stellt die Evaluation alternativer Sprachmodelle ein weiteres Optimierungspotenzial dar. Verschiedene Modelle unterscheiden sich hinsichtlich ihrer Fähigkeit zur Verarbeitung langer Kontexte, strukturierter Daten und komplexer Anweisungen. Ein systematischer Vergleich kann dabei helfen, ein Modell zu identifizieren, das eine bessere Balance zwischen Analysequalität, Verarbeitungsgeschwindigkeit und Ressourcenanforderungen bietet.
+
+\newpage
 \subsection{Prompt-Gestaltung}
-ein Besonders großer Einfluss auf die Qualität der Ergebnisse ergibt sich aus der Gestaltung der Prompts. Da das Sprachmodell maßgeblich durch den Kontext gesteuert wird, stellt das Prompt-Design einen zentralen Hebel dar. 
+Die Gestaltung der Prompts stellt einen wichtigen Einflussfaktor auf die Qualität der Ergebnisse dar, da das Sprachmodell ausschließlich auf Basis des bereitgestellten Kontexts arbeitet. Neben der strukturellen Aufbereitung der Eingabedaten ist insbesondere die inhaltliche Formulierung der Aufgabenstellung entscheidend, da sie steuert, welche Informationen extrahiert, wie diese gewichtet und in welcher Form sie ausgegeben werden. Eine präzise und eindeutige Beschreibung der gewünschten Ausgabe, einschließlich Formatvorgaben, Priorisierung bestimmter Inhalte oder expliziter Anweisungen zur Identifikation von Entscheidungen und Aufgaben, kann die Konsistenz und Verwertbarkeit der Ergebnisse deutlich verbessern.
 
-Zero-Shot-Prompting:
-Beim Zero-Shot-ansatz erhält das Modell lediglich eine Aufgabenbeschreibung. Dieser Ansatz ist leichtgewichtig und effizient, birgt jedoch Risiken wie z.B. 
-\begin{itemize}
-    \item uneinheitliche Struktur der Ausgabe
-    \item unklare Gewichtung einzelner Inhalte
-    \item stärkere Abhängigkeit vom jeweiligen Kontext
-\end{itemize}
+Eine klar formulierte \textit{DSPy Instruction} kann das Modell dazu anleiten, neue Informationen nicht isoliert anzuhängen, sondern diese in den bestehenden Kontext einzuordnen, Redundanzen zu entfernen und inhaltlich zusammengehörige Punkte zu konsolidieren. Die aktuell gewählte \textit{dspy.instruction} (siehe Listing \ref{lst:prompting}) wurde für erste Versuche sehr allgemein gewählt. Die explizite Definition inhaltlicher Prioritäten, etwa die bevorzugte Extraktion von Entscheidungen, Aufgaben, Verantwortlichkeiten und zentralen Diskussionsergebnissen, kann die Relevanz und Nutzbarkeit der erzeugten Zusammenfassung zusätzlich erhöhen. Ebenso trägt die Vorgabe einer konsistenten Struktur dazu bei, dass die Ergebnisse über mehrere Verarbeitungsschritte hinweg einheitlich und nachvollziehbar bleiben.
 
-Few-Shot-Prompting:
-Durch das Ergänzen weniger Beispielausgaben kann das Modell stärker gelenkt werden. Mögliche Vorteile sind: 
-\begin{itemize}
-    \item konsistentere Formatierung
-    \item bessere Identifikation von Entscheidungen und Aufgaben
-    \item höhere Vergleichbarkeit zwischen einzelnen Zusammenfassungen
-\end{itemize}
-Dem steht ein erhöhter Tokenverbrauch gegenüber, der sich sowhl auf die Latenz als auch auf die Kosten auswirkt. Theoretisch bietet sich daher ein hybrider Ansatz an, bei dem Few-Shot-Prompts nur für ausgewählte Verarbeitungsschritte eingesetzt werden. 
+Beim Zero-Shot-Ansatz erhält das Modell ausschließlich eine Aufgabenbeschreibung ohne zusätzliche Beispiele. Dieser Ansatz ist effizient und flexibel, kann jedoch zu uneinheitlichen Ausgaben, unterschiedlicher Gewichtung von Inhalten und einer stärkeren Abhängigkeit vom jeweiligen Eingabekontext führen. Insbesondere bei komplexeren Analyseaufgaben kann dies die Vergleichbarkeit der Ergebnisse einschränken.
+
+Few-Shot-Prompting stellt eine Erweiterung dar, bei der dem Modell zusätzlich Beispiel-Ein- und Ausgaben bereitgestellt werden. Dadurch erhält das Modell eine implizite Orientierung hinsichtlich Struktur, Detailgrad und Priorisierung relevanter Inhalte. Dies führt in der Regel zu konsistenteren und besser strukturierten Ergebnissen sowie zu einer zuverlässigeren Identifikation relevanter Informationen wie Entscheidungen oder Aufgaben. Der zusätzliche Tokenverbrauch wirkt sich in typischen Anwendungsszenarien jedoch nur moderat auf Latenz und Kosten aus, da Eingabetoken vergleichsweise ressourcenschonend verarbeitet werden. Einschränkungen können sich dennoch durch die begrenzte Kontextfenstergröße ergeben, insbesondere bei sehr langen Transkripten. Zudem besteht die Möglichkeit, dass die bereitgestellten Beispiele unerwünschte Muster oder Gewichtungen auf nachfolgende Ausgaben übertragen.
+
+Eine sinnvolle Strategie kann daher in der gezielten Kombination beider Ansätze bestehen. Während Zero-Shot-Prompts für allgemeine Verarbeitungsschritte ausreichend sein können, bietet sich Few-Shot-Prompting insbesondere für strukturkritische Aufgaben an, bei denen eine konsistente Ausgabe und klare inhaltliche Fokussierung erforderlich sind.
 
 \subsection{Voranalyse mit klassischen NLP-Verfahren}
 Eine weitere Möglichkeit der Optimierung besteht in der vorgeschalteten Analyse der Transkripte mittels klassischer NLP-Methoden. Ziel ist es, dem Sprachmodell nicht ausschließlich Rohtext, sondern bereits strukturierte Informationen bereitzustellen. 
@@ -66,10 +186,30 @@ Mögliche Verfahren sind unter anderem:
     \item Klassifikation von Gesprächsanteilen (Diskussion, Entscheidung, Aufgabe)
 \end{itemize}
 
-Werkzeuge wie spaCy eignen sich für solche Aufgaben, da sie effizient arbeiten und sich gut in bestehende Pipelines integrieren lassen. Eine solche Vorverarbeitung könnte insbesondere die Extraktion von Aktionspunkten udn Beschlüssen verbessern. 
+Existierende Python-Werkzeuge wie spaCy \cite{spacy} eignen sich für solche Aufgaben, da sie effizient arbeiten und sich gut in bestehende Pipelines integrieren lassen. Eine solche Vorverarbeitung könnte insbesondere die Extraktion von Aktionspunkten und Beschlüssen verbessern. 
 
 Neben der inhaltlichen Qualität spielt die Systemleistung ebenfalls eine zentrale Rolle, insbesondere bei einem Einsatz während laufender Meetings. 
-Durch effektive Filterstrategien lassen sich irrelevante Inhalte wie Smalltalk oder Wiederholungen herausfiltern und somit die Belastung des LLM reduzieren, was sich positiv auf die Laufzeit auswirkt. 
+Durch effektive Filterstrategien lassen sich irrelevante Inhalte wie Smalltalk oder Wiederholungen herausfiltern und somit die Belastung des LLM reduzieren, was sich positiv auf die Laufzeit auswirkt. Mit \textit{spaCy} lassen sich Texte bereits auf festgelegte Schlüsselwörter analysieren und im Prompt anders aufbereiten. 
 
-Die gezeigten Opimierungsansätze zeigen, dass trotz der aktuell noch festen Vorgabe durch die Spracherkennung Verbesserungspotential besteht. Die beschriebenen Ansätze bilden eine konzeptionelle Grundlage für zukünftige Erweiterungen und können in weiterführenden Arbeiten praktisch evaluiert und miteinander verglichen werden. 
+Die aufgeführten Optimierungsansätze zeigen, dass trotz der aktuell noch festen Vorgabe durch die Spracherkennung Verbesserungspotential besteht. Die beschriebenen Ansätze bilden eine konzeptionelle Grundlage für zukünftige Erweiterungen und können in weiterführenden Arbeiten praktisch evaluiert und miteinander verglichen werden.
+
+\chapter{Diskussion}
+Ziel dieser Arbeit war die Konzeption, Implementierung und Evaluation eines Live-Meetingassistenten, der während laufender Meetings automatisch Transkripte verarbeitet und fortlaufend Zusammenfassungen generiert. Die Ergebnisse zeigen deutlich, dass ein solches System technisch realisierbar ist und einen praktischen Mehrwert bieten kann, gleichzeitig jedoch systematische Qualitätsgrenzen bestehen, die insbesondere aus der Echtzeitverarbeitung und der Abhängigkeit von fehlerbehafteten Transkripten resultieren. Im Folgenden werden die Resultate im Kontext der Forschungsfragen kritisch eingeordnet.
+
+Bezogen auf die erste Forschungsfrage nach der Entwicklung eines Live-Meetingassistenten konnte gezeigt werden, dass eine modulare Architektur aus Transkription, textbasierter Vorverarbeitung, LLM-gestützter Zusammenfassung sowie einer Frontend-Integration grundsätzlich funktional ist.  Es konnte festgestellt werden, dass eine inkrementelle Aktualisierung ausreicht, um den Nutzer während des Meetings zu unterstützen. Damit konnte bestätigt werden, dass ein Live-Meetingassistent mit heutigen LLMs umsetzbar ist.
+
+Im Hinblick auf die Anforderungen an einen solchen Assistenten zeigen die qualitativen Ergebnisse jedoch klar, dass reine Textgenerierung nicht ausreicht. Für einen tatsächlichen Mehrwert müssen Informationen nicht nur zusammengefasst, sondern strukturiert, korrekt gewichtet und zuverlässig einzelnen Verantwortlichkeiten zugeordnet werden. Die Evaluation verdeutlicht, dass insbesondere Entscheidungen, Aufgaben und offene Punkte konsistent erkannt werden müssen, um das System praxistauglich zu machen. Das aktuelle System erreicht hier lediglich eine eingeschränkte Zuverlässigkeit. Fehlzuweisungen von To-Dos oder das Auslassen zentraler Diskussionspunkte reduzieren den praktischen Nutzen deutlich. Daraus folgt, dass funktionale Anforderungen wie Robustheit gegenüber Transkriptionsfehlermeldungen, stabile Kontextverwaltung über längere Zeiträume und eine explizite Aktionspunkt-Extraktion mindestens genauso wichtig, wenn nicht sogar wichtiger sind wie die reine sprachliche Qualität der Zusammenfassung.
+
+Die quantitative Analyse liefert ein differenziertes Bild zur dritten Forschungsfrage, dem Vergleich zwischen Live-Zusammenfassungen und nachträglich erzeugten Gesamtzusammenfassungen. Die ROUGE-Werte zeigen insgesamt nur moderate n-Gramm-Überlappungen, was zunächst auf eine geringe textuelle Übereinstimmung hindeutet. Gleichzeitig erreichen die BERTScores durchgängig höhere Werte, was auf eine solide semantische Nähe schließen lässt. Diese Diskrepanz ist erwartbar, da abstraktive Zusammenfassungen häufig andere Formulierungen verwenden als Referenztexte. Besonders relevant ist jedoch, dass die KI-basierte Referenzzusammenfassung (\textit{AI-Summary)} in allen Meetings konsistent höhere BERTScore-Werte erzielt als der direkte Vergleich mit dem Transkript. Dies deutet darauf hin, dass eine nachgelagerte Gesamtzusammenfassung qualitativ überlegen ist.
+
+Konkret bedeutet das, das Live-System kann thematische Kernaussagen erfassen, erreicht jedoch nicht die Kohärenz und Vollständigkeit einer einmaligen, globalen Verarbeitung des gesamten Transkripts. Dieses Ergebnis war bereits anfangs zu erwarten. Während der Laufzeit stehen dem Modell nur Teilinformationen zur Verfügung, wodurch Kontextverluste und Fehlinterpretationen wahrscheinlicher werden. Die gemessenen Werte belegen keine Schwäche der Implementierung, sondern eine strukturelle Grenze inkrementeller Zusammenfassung. Ein Live-Ansatz wird systembedingt selten die Qualität einer Offline-Gesamtauswertung übertreffen. 
+
+Die qualitative Analyse bestätigt diese Interpretation deutlich. Der beobachtete Rezenzeffekt, das Vergessen früherer Inhalte sowie die Persistenz fehlerhafter Zwischenstände zeigen typische Probleme einer Rolling Summary. Eingeführte Falschinterpretationen werden nur selten korrigiert und wirken sich kumulativ aus. Zusätzlich führen Transkriptionsfehler direkt zu inhaltlichen Verzerrungen, da das LLM keine Möglichkeit besitzt, diese zuverlässig zu erkennen oder zu validieren. Hier zeigt sich eine klare Abhängigkeit von der Qualität der Spracherkennung. Solange das Eingangssignal fehlerhaft ist, bleibt auch die Zusammenfassung fehleranfällig. Dabei handelt es sich um eine fundamentale Einschränkung, welche sich nicht ausschließlich durch Prompt Optimierung beheben lässt.
+
+Bezüglich der vierten Forschungsfrage zur zeitlichen Machbarkeit zeigen die Tests, dass die Generierung der Live-Zusammenfassungen in ausreichend kurzer Zeit erfolgt, um den natürlichen Arbeitsfluss nicht zu unterbrechen. Die Verarbeitung erfolgt nicht in Echtzeit im Millisekundenbereich, jedoch schnell genug, um als unterstützendes Werkzeug wahrgenommen zu werden. Damit erfüllt das System eine zentrale praktische Anforderung. Eine leicht verzögerte, aber kontinuierlich aktualisierte Zusammenfassung ist für Nutzer deutlich wertvoller als eine perfekte, aber erst nach dem Meeting verfügbare Auswertung. Dieser Abwägen zwischen Geschwindigkeit und Qualität ist im Anwendungskontext gerechtfertigt.
+
+Trotz der insgesamt positiven Ergebnisse in Bezug auf die allgemeine Umsetzbarkeit, müssen die Grenzen der Evaluation klar benannt werden. Die Anzahl der Meetings ist mit drei Szenarien begrenzt, wodurch die statistische Aussagekraft eingeschränkt bleibt. Zudem unterscheiden sich die Meetings hinsichtlich Teilnehmerzahl, Struktur und Gesprächsdynamik, was die Vergleichbarkeit erschwert. Weiterhin basieren die automatischen Metriken auf textuellen Referenzen, die selbst keine objektive Wahrheit darstellen, sondern ebenfalls durch ein LLM erzeugt wurden. Eine Erweiterung der Evaluation auf eine größere Anzahl realer Meetings würde eine bessere Bewertung der Zusammenfassungsqualität ermöglichen und könnte Teil fortführender Arbeiten werden.
+
+
+Der entwickelte Live-Meetingassistent funktioniert, liefert semantisch sinnvolle Zusammenfassungen und ist im praktischen Einsatz zeitlich geeignet. Gleichzeitig bleibt die Qualität hinter einer nachträglichen Gesamtauswertung zurück, insbesondere bei längeren und komplexeren Meetings. Die größten Schwachstellen des Systems liegen nicht im analysierenden Sprachmodell selbst, sondern in der fortlaufenden Kontextverwaltung sowie in der Fehleranfälligkeit der zugrunde liegenden Transkripte. Optimierungen wie strukturierte Vorverarbeitung, gezieltes Prompt-Design oder hybride NLP-Ansätze sind daher vielversprechende nächste Schritte.
 

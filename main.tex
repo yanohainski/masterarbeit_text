@@ -12,7 +12,9 @@ final  %final/ draft		% draft/final entscheidet z.B. ob Bilder drin sind oder nu
 \usepackage{setspace}		% Zeilenabstände
 \onehalfspacing				% nicht direkt 1,5-facher WORD-Abstand!
 \usepackage[english, ngerman]{babel} 						% neue Rechtschreibung durch n(ew)german (auch Silbentrennung), letzte Sprache ist Hauptsprache
-\usepackage[utf8]{inputenc}  								% inputencoding [eingabecodierung, enthält z.B. ß,ö,ä,...]
+\usepackage[utf8]{inputenc}
+\usepackage{newunicodechar}
+\newunicodechar{ }{~}                                       % inputencoding [eingabecodierung, enthält z.B. ß,ö,ä,...]
 \usepackage[T1]{fontenc} 									% fontencoding (Zeichensatz, Ausgabe)
 \usepackage[autostyle=true,german=guillemets]{csquotes} 	% korrekte Zitierart in allen babel-Sprachen --> \enquote; ohne guillemets: Hochkommata
 \usepackage[newcommands] {ragged2e} 						% Silbentrennung, bei rechts-/ linksbündig
@@ -36,6 +38,7 @@ final  %final/ draft		% draft/final entscheidet z.B. ob Bilder drin sind oder nu
 \usepackage{tabularx}
 \usepackage{listings}
 \usepackage{float}
+\usepackage{makecell}
 
 % Define colors for code highlighting
 \definecolor{keyword}{RGB}{0,0,255} % Blue for keywords
@@ -143,7 +146,7 @@ basicstyle=\ttfamily\small,
 
 %% Definition der Daten für die Titelseite
 \author{Yan Ohainski} 
-\title{Entwicklung eine KI-basierten Meetingassistenten zur Darstellung und Aufbereitung gesprochener Inhalte}
+\title{Entwicklung eines KI-basierten Meetingassistenten zur Darstellung und Aufbereitung gesprochener Inhalte}
 %\subtitle{Simulation in MATLAB Simulink} 
 \date{\today}
 %\titlehead{Titelkopf}
@@ -154,11 +157,11 @@ basicstyle=\ttfamily\small,
 	\vspace{1.0cm}
 	an der Hochschule für angewandte Wissenschaft und Kunst
  
-    Prüfer:
+    Erstprüfer:
     
     Prof. Dr. rer. nat. Roman Grothausmann
     
-    Betreuer:
+    Zweitprüfer:
     
 	Henri Reumschüssel
 	
@@ -170,7 +173,7 @@ basicstyle=\ttfamily\small,
 
 
 %Literaturdatenbank verlinken
-%\addbibresource{lib_masterarbeit.bib}
+\addbibresource{Masterthesis.bib}
 
 %Fremdwortverzeichnis 
 \PassOptionsToPackage{intoc,nomentbl}{nomencl}
@@ -200,6 +203,8 @@ basicstyle=\ttfamily\small,
 \addcontentsline{toc}{chapter}{Tabellenverzeichnis}
 \listoffigures
 \addcontentsline{toc}{chapter}{Abbildungsverzeichnis}
+\lstlistoflistings
+\addcontentsline{toc}{chapter}{Codeverzeichnis}
 % \printnomenclature
 %\addcontentsline{toc}{chapter}{Eigenständigkeitserklärung \& Nutzungsrecht}	 	
 \input{Selbstständigkeit}
@@ -216,5 +221,6 @@ basicstyle=\ttfamily\small,
 
 % Literaturverzeichnis
 \printbibliography
-
+\appendix
+\input{07_Anhang}
 \end{document}
